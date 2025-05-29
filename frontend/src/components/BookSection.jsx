@@ -1,5 +1,9 @@
 import { Link } from "react-router-dom";
-
+import book_1 from "../assets/books/book-1.jpg";
+import book_2 from "../assets/books/book-2.jpg";
+import book_3 from "../assets/books/book-3.jpg";
+import book_4 from "../assets/books/book-4.jpg";
+import book_5 from "../assets/books/book-5.jpg";
 const books = [
   {
     title: "The Locked Room",
@@ -9,7 +13,7 @@ const books = [
     discount: "-7%",
     category: "Fiction",
     rating: 4.5,
-    image: "https://covers.openlibrary.org/b/id/8231856-L.jpg",
+    image: book_1,
   },
   {
     title: "It Happened One Summer",
@@ -18,8 +22,8 @@ const books = [
     oldPrice: "$56",
     discount: "-20%",
     category: "Romantic",
-    rating: 0, // 0 or null means no rating
-    image: "https://covers.openlibrary.org/b/id/8228691-L.jpg",
+    rating: 0,
+    image: book_2,
   },
   {
     title: "Mystery of the Blue Train",
@@ -29,7 +33,7 @@ const books = [
     discount: "-20%",
     category: "Mystery",
     rating: 3,
-    image: "https://covers.openlibrary.org/b/id/8306662-L.jpg",
+    image: book_3,
   },
   {
     title: "The Silent Patient",
@@ -39,7 +43,7 @@ const books = [
     discount: "-14%",
     category: "Thriller",
     rating: 5,
-    image: "https://covers.openlibrary.org/b/id/10528614-L.jpg",
+    image: book_4,
   },
   {
     title: "Educated",
@@ -49,7 +53,7 @@ const books = [
     discount: "-22%",
     category: "Memoir",
     rating: 4,
-    image: "https://covers.openlibrary.org/b/id/8235081-L.jpg",
+    image: book_5,
   },
 ];
 
