@@ -76,28 +76,35 @@ const Categories = () => {
   }, []);
 
   return (
-    <section className="py-6 container bg-white">
-      <div
-        ref={sliderRef}
-        className="flex gap-8 overflow-x-auto scrollbar-hide px-4 cursor-grab select-none"
-        style={{ scrollBehavior: "smooth" }}
-      >
-        {categories.map((cat, i) => (
-          <Link
-            to={`/category/${encodeURIComponent(cat.name.toLowerCase())}`}
-            key={i}
-            className="flex flex-col items-center min-w-[100px] sm:min-w-[120px] transition-transform hover:scale-105"
-          >
-            <div className="bg-gray-100 p-6 rounded-full">
-              <img
-                src={cat.image}
-                alt={cat.name}
-                className="w-12 h-12 object-contain"
-              />
-            </div>
-            <p className="mt-2 text-sm font-semibold text-center">{cat.name}</p>
-          </Link>
-        ))}
+    <section className="py-10 bg-gradient-to-br from-green-50 to-white">
+      <div className="container mx-auto px-4">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+          Browse by Category
+        </h2>
+        <div
+          ref={sliderRef}
+          className="flex gap-6 overflow-x-auto scrollbar-hide px-1 md:px-4 cursor-grab select-none py-5"
+          style={{ scrollBehavior: "smooth" }}
+        >
+          {categories.map((cat, i) => (
+            <Link
+              to={`/category/${encodeURIComponent(cat.name.toLowerCase())}`}
+              key={i}
+              className="flex flex-col items-center min-w-[100px] sm:min-w-[120px] transition-transform hover:scale-110 hover:shadow-xl"
+            >
+              <div className="bg-white p-4 rounded-full shadow-md hover:ring-2 hover:ring-green-500 transition duration-300">
+                <img
+                  src={cat.image}
+                  alt={cat.name}
+                  className="w-14 h-14 object-contain"
+                />
+              </div>
+              <p className="mt-3 text-sm font-medium text-gray-700 text-center uppercase tracking-wide">
+                {cat.name}
+              </p>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );

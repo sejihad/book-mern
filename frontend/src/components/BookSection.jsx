@@ -1,9 +1,11 @@
+import { FaRegStar, FaStar, FaStarHalfAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import book_1 from "../assets/books/book-1.jpg";
 import book_2 from "../assets/books/book-2.jpg";
 import book_3 from "../assets/books/book-3.jpg";
 import book_4 from "../assets/books/book-4.jpg";
 import book_5 from "../assets/books/book-5.jpg";
+
 const books = [
   {
     title: "The Locked Room",
@@ -58,51 +60,18 @@ const books = [
 ];
 
 const StarRating = ({ rating }) => {
-  if (!rating || rating <= 0) return null;
-
   const fullStars = Math.floor(rating);
   const halfStar = rating % 1 >= 0.5;
   const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
 
   return (
-    <div className="flex items-center text-yellow-400 text-sm mt-1">
+    <div className="flex justify-center mt-2 text-yellow-400 text-sm">
       {[...Array(fullStars)].map((_, i) => (
-        <svg
-          key={"full" + i}
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-4 w-4 fill-current"
-          viewBox="0 0 20 20"
-        >
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.974a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.388 2.46a1 1 0 00-.364 1.118l1.287 3.974c.3.922-.755 1.688-1.54 1.118l-3.388-2.46a1 1 0 00-1.176 0l-3.388 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.974a1 1 0 00-.364-1.118L2.045 9.4c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.974z" />
-        </svg>
+        <FaStar key={i} />
       ))}
-      {halfStar && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-4 w-4 fill-current"
-          viewBox="0 0 20 20"
-        >
-          <defs>
-            <linearGradient id="half-grad">
-              <stop offset="50%" stopColor="currentColor" />
-              <stop offset="50%" stopColor="transparent" stopOpacity="1" />
-            </linearGradient>
-          </defs>
-          <path
-            fill="url(#half-grad)"
-            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.974a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.388 2.46a1 1 0 00-.364 1.118l1.287 3.974c.3.922-.755 1.688-1.54 1.118l-3.388-2.46a1 1 0 00-1.176 0l-3.388 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.974a1 1 0 00-.364-1.118L2.045 9.4c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.974z"
-          />
-        </svg>
-      )}
+      {halfStar && <FaStarHalfAlt />}
       {[...Array(emptyStars)].map((_, i) => (
-        <svg
-          key={"empty" + i}
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-4 w-4 fill-gray-300"
-          viewBox="0 0 20 20"
-        >
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.974a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.388 2.46a1 1 0 00-.364 1.118l1.287 3.974c.3.922-.755 1.688-1.54 1.118l-3.388-2.46a1 1 0 00-1.176 0l-3.388 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.974a1 1 0 00-.364-1.118L2.045 9.4c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.974z" />
-        </svg>
+        <FaRegStar key={i} />
       ))}
     </div>
   );
@@ -110,59 +79,56 @@ const StarRating = ({ rating }) => {
 
 const BookSection = ({ title }) => {
   return (
-    <section className="container py-6 px-4 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-6 px-2">
-        <h3 className="text-2xl font-semibold">
+    <section className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">
           {title} <span className="text-green-600">Books</span>
-        </h3>
-        <button className="text-sm text-blue-600 hover:underline">
+        </h2>
+        <button className="text-blue-600 hover:underline text-sm font-medium">
           Show All →
         </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        {books.slice(0, 5).map((book, i) => (
+        {books.map((book, i) => (
           <div
             key={i}
-            className="border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300"
+            className="bg-white rounded-2xl shadow hover:shadow-lg transition duration-300 border-amber-50"
           >
-            <div className="relative">
-              <div className="overflow-hidden rounded-t-lg">
-                <Link to="/category/name/book" className="block">
-                  <img
-                    src={book.image}
-                    alt={book.title}
-                    className="w-full h-48  transform transition-transform duration-300 hover:scale-105 cursor-pointer"
-                  />
-                </Link>
-              </div>
-
+            <div className="relative rounded-t-2xl group overflow-hidden">
+              <Link to="/category/name/book">
+                <img
+                  src={book.image}
+                  alt={book.title}
+                  className="  w-full h-56  rounded-t-2xl group-hover:scale-105 transition duration-300"
+                />
+              </Link>
               {book.discount && (
-                <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded">
+                <span className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow">
                   {book.discount}
-                </div>
+                </span>
               )}
             </div>
-            <div className="p-3">
-              <h4 className="text-lg font-semibold truncate">{book.title}</h4>
+
+            <div className="p-4 text-center">
+              <h3 className="text-md font-semibold  text-gray-800">
+                {book.title}
+              </h3>
+              <p className="text-sm text-gray-500">{book.author}</p>
               <StarRating rating={book.rating} />
-              <p className="text-sm text-gray-600 mt-1">{book.category}</p>
-              <div className="mt-2 flex items-center gap-2 text-sm font-medium">
-                <span className="text-green-600">{book.price}</span>
+              <span className="inline-block mt-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                {book.category}
+              </span>
+              <div className="flex items-center justify-center gap-2 mt-2 text-sm">
+                <span className="text-green-600 font-semibold">
+                  {book.price}
+                </span>
                 <span className="line-through text-gray-400">
                   {book.oldPrice}
                 </span>
               </div>
-              <button
-                className="cursor-pointer
-    mt-4 w-full 
-    bg-gradient-to-r from-blue-500 via-teal-400 to-green-500 
-    text-white py-2 rounded 
-    hover:from-blue-600 hover:via-teal-500 hover:to-green-600 
-    transition
-  "
-              >
-                Add to cart
+              <button className="mt-4 w-full bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold py-2 rounded-xl hover:from-blue-600 hover:to-green-600 transition-all duration-300 cursor-pointer">
+                Add to Cart
               </button>
             </div>
           </div>
