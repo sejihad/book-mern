@@ -44,7 +44,13 @@ const Setting = () => {
               Two-Factor Authentication
             </h3>
             <p className="text-sm text-gray-500">
-              Add extra security to your account.
+              {twoFactorEnabled
+                ? "Your account is protected with an extra layer of security."
+                : "Enable to add an extra security layer to your account."}
+              <br />
+              {twoFactorEnabled
+                ? "You'll need both your password and authentication code to sign in."
+                : "Requires both password and verification code for login."}
             </p>
           </div>
 
@@ -54,6 +60,7 @@ const Setting = () => {
             className={`relative inline-flex items-center h-7 w-14 rounded-full transition-colors duration-300 ${
               twoFactorEnabled ? "bg-green-500" : "bg-gray-300"
             } ${loading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+            aria-label={twoFactorEnabled ? "Disable 2FA" : "Enable 2FA"}
           >
             <span
               className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-300 ${
@@ -89,6 +96,20 @@ const Setting = () => {
             )}
           </button>
         </div>
+
+        {/* Additional Security Information */}
+        {twoFactorEnabled && (
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+            <h4 className="font-medium text-blue-800 mb-2">How it works:</h4>
+            <ul className="text-sm text-blue-700 list-disc pl-5 space-y-1">
+              <li>Sign in with your password as usual</li>
+              <li>
+                Enter the verification code sent to your email to complete the
+                login process.
+              </li>
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   FaAngleDown,
   FaCog,
+  FaCreditCard,
   FaShoppingBag,
   FaSignInAlt,
   FaSignOutAlt,
@@ -160,7 +161,13 @@ const Header = () => {
                         <FaCog /> Setting
                       </Link>
                     )}
-
+                    <Link
+                      to="/payments"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-green-700 transition-colors duration-200 rounded-md"
+                    >
+                      <FaCreditCard /> Payments
+                    </Link>
                     <Link
                       to="/orders"
                       onClick={() => setShowUserMenu(false)}
