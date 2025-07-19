@@ -158,7 +158,14 @@ const Profile = () => {
                         {user?.number || "N/A"}
                       </p>
                     </div>
-
+                    <div>
+                      <label className="block text-sm font-medium text-gray-500 mb-1">
+                        Country Name
+                      </label>
+                      <p className="text-lg font-medium text-gray-800 bg-gray-50 p-3 rounded-lg capitalize">
+                        {user?.country || "N/A"}
+                      </p>
+                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-500 mb-1">
                         Account Type

@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { FiArrowLeft, FiCamera, FiMail, FiPhone, FiUser } from "react-icons/fi";
+import {
+  FiArrowLeft,
+  FiCamera,
+  FiGlobe,
+  FiMail,
+  FiPhone,
+  FiUser,
+} from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -19,6 +26,7 @@ const UpdateProfile = () => {
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [email, setEmail] = useState("");
+  const [country, setCountry] = useState("");
   const [avatar, setAvatar] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState("/Profile.png");
   const [isHovering, setIsHovering] = useState(false);
@@ -30,6 +38,9 @@ const UpdateProfile = () => {
 
     if (name !== user.name) {
       formData.name = name;
+    }
+    if (country !== user.country) {
+      formData.country = country;
     }
 
     if (number !== user.number) {
@@ -186,6 +197,18 @@ const UpdateProfile = () => {
                       onChange={(e) => setName(e.target.value)}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition"
                       placeholder="Enter your full name"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-gray-600 flex items-center">
+                      <FiGlobe className="mr-2" /> Country Name
+                    </label>
+                    <input
+                      type="text"
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition"
+                      placeholder="Enter your country name"
                     />
                   </div>
 
