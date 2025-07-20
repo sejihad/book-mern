@@ -91,6 +91,7 @@ const UpdateProfile = () => {
   useEffect(() => {
     if (user) {
       setName(user.name || "");
+      setCountry(user.country || "");
       setNumber(user.number || "");
       setEmail(user.email || "");
       setAvatarPreview(user.avatar?.url || "/Profile.png");
