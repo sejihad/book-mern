@@ -127,7 +127,7 @@ const BookSection = ({ title }) => {
                   {book.oldPrice}
                 </span>
               </div>
-              <button className="mt-4 w-full bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold py-2 rounded-xl hover:from-blue-600 hover:to-green-600 transition-all duration-300 cursor-pointer">
+              <button className="mt-4 w-full bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold py-2  hover:from-blue-600 hover:to-green-600 transition-all duration-300 cursor-pointer">
                 Add to Cart
               </button>
             </div>

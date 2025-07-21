@@ -3,7 +3,6 @@ import {
   FiArrowLeft,
   FiCamera,
   FiGlobe,
-  FiMail,
   FiPhone,
   FiUser,
 } from "react-icons/fi";
@@ -25,7 +24,7 @@ const UpdateProfile = () => {
 
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
-  const [email, setEmail] = useState("");
+
   const [country, setCountry] = useState("");
   const [avatar, setAvatar] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState("/Profile.png");
@@ -45,13 +44,6 @@ const UpdateProfile = () => {
 
     if (number !== user.number) {
       formData.number = number;
-    }
-
-    if (
-      (user?.provider === "local" || user?.provider === "facebook") &&
-      email !== user.email
-    ) {
-      formData.email = email;
     }
 
     if (avatar) {
@@ -93,7 +85,7 @@ const UpdateProfile = () => {
       setName(user.name || "");
       setCountry(user.country || "");
       setNumber(user.number || "");
-      setEmail(user.email || "");
+
       setAvatarPreview(user.avatar?.url || "/Profile.png");
     }
   }, [user]);
@@ -226,23 +218,6 @@ const UpdateProfile = () => {
                       placeholder="Enter your phone number"
                     />
                   </div>
-
-                  {/* Email Field (only for local provider) */}
-                  {(user?.provider === "local" ||
-                    user?.provider === "facebook") && (
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-gray-600 flex items-center">
-                        <FiMail className="mr-2" /> Email Address
-                      </label>
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition"
-                        placeholder="Enter your email"
-                      />
-                    </div>
-                  )}
 
                   {/* Submit Button */}
                   <button

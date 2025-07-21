@@ -4,7 +4,9 @@ import "react-toastify/dist/ReactToastify.css";
 import Footer from "./component/layout/Footer";
 import Header from "./component/layout/Header";
 import ProtectedRoute from "./component/Route/ProtectedRoute";
+import AllBlogs from "./pages/Admin/AllBlogs";
 import Dashboard from "./pages/Admin/Dashboard";
+import NewBlog from "./pages/Admin/NewBlog";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
 import GoogleSuccess from "./pages/Auth/GoogleSuccess";
 import Login from "./pages/Auth/Login";
@@ -25,7 +27,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/blogs" element={<Blogs />} />
-        <Route path="/blog/:title" element={<BlogDetails />} />
+        <Route path="/blog/:id" element={<BlogDetails />} />
         <Route path="/login" element={<Login />} />
 
         <Route path="/google-success" element={<GoogleSuccess />} />
@@ -75,6 +77,22 @@ const App = () => {
           element={
             <ProtectedRoute isAdmin={true}>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/blog"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <NewBlog />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/blogs"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <AllBlogs />
             </ProtectedRoute>
           }
         />

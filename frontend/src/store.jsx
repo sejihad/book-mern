@@ -4,10 +4,16 @@ import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // LocalStorage use korar jonno
 import { thunk } from "redux-thunk"; // ✅ Named import
 import {
+  blogDetailsReducer,
+  blogReducer,
+  blogsReducer,
+  newBlogReducer,
+} from "./reducers/blogReducer";
+import {
   forgotPasswordReducer,
   profileReducer,
   userReducer,
-} from "./reducers/userReducer.jsx";
+} from "./reducers/userReducer";
 
 // Persist Config
 const persistConfig = {
@@ -21,6 +27,10 @@ const rootReducer = combineReducers({
   user: userReducer,
   profile: profileReducer,
   forgotPassword: forgotPasswordReducer,
+  newBlog: newBlogReducer,
+  blogs: blogsReducer,
+  blog: blogReducer,
+  blogDetails: blogDetailsReducer,
 });
 
 // Create persisted reducer

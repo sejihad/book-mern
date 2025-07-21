@@ -284,9 +284,9 @@ const getUserDetails = catchAsyncErrors(async (req, res, next) => {
 
 // update profile
 const updateProfile = catchAsyncErrors(async (req, res, next) => {
-  const { name, email, number, avatar, country } = req.body;
+  const { name, number, avatar, country } = req.body;
 
-  const newUserData = { name, email, number, country };
+  const newUserData = { name, number, country };
 
   const user = await User.findById(req.user.id);
 

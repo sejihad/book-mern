@@ -7,6 +7,7 @@ const fileUpload = require("express-fileupload");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const user = require("./routes/userRoute");
+const blog = require("./routes/blogRoute");
 
 dotenv.config();
 require("./config/passport");
@@ -32,6 +33,7 @@ app.use(
 // API Routes
 
 app.use("/api/v1", user);
+app.use("/api/v1", blog);
 
 // Error Middleware
 app.use(errorMiddleware);
