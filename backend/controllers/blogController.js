@@ -69,9 +69,94 @@ const getBlogDetails = catchAsyncErrors(async (req, res, next) => {
 
   res.status(200).json({ success: true, blog });
 });
+const updateBlog = catchAsyncErrors(async (req, res, next) => {
+  let blog = await Blog.findById(req.params.id);
+
+  if (!blog) {
+    return next(new ErrorHandler("Blog not found", 404));
+  }
+
+  // ✅ যদি নতুন ছবি থাকে তাহলে পুরাতোটা ডিলিট করে আপলোড করো
+  if (req.files && req.files.image) {
+    // পুরাতন ছবি ডিলিট
+    if (blog.image && blog.image.public_id) {
+      try {
+        await cloudinary.uploader.destroy(blog.image.public_id);
+      } catch (error) {
+        console.error("Cloudinary Deletion Error:", error);
+      }
+    }
+
+    // নতুন ছবি আপলোড
+    try {
+      const result = await cloudinary.uploader.upload(
+        `data:${
+          req.files.image.mimetype
+        };base64,${req.files.image.data.toString("base64")}`,
+        {
+          folder: "/book/blogs",
+        }
+      );
+
+      req.body.image = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
+    } catch (error) {
+      console.error("Cloudinary Upload Error:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Image upload failed" });
+    }
+  }
+
+  // ✅ টাইটেল বা ডিসক্রিপশন যেটা আসবে, সেটাই আপডেট হবে
+  const updatedData = {};
+  if (req.body.title) updatedData.title = req.body.title;
+  if (req.body.desc) updatedData.desc = req.body.desc;
+  if (req.body.image) updatedData.image = req.body.image;
+
+  // ✅ আপডেট করে সেভ
+  blog = await Blog.findByIdAndUpdate(req.params.id, updatedData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+    blog,
+  });
+});
+
+const deleteBlog = catchAsyncErrors(async (req, res, next) => {
+  const blog = await Blog.findById(req.params.id);
+
+  if (!blog) {
+    return next(new ErrorHandler("Blog not found", 404));
+  }
+
+  if (blog.image && blog.image.public_id) {
+    try {
+      await cloudinary.uploader.destroy(blog.image.public_id);
+    } catch (error) {
+      console.error("Cloudinary Deletion Error:", error);
+    }
+  }
+
+  await Blog.findByIdAndDelete(req.params.id);
+
+  res.status(200).json({
+    success: true,
+    message: "Blog deleted successfully",
+  });
+});
+
 module.exports = {
   createBlog,
   getAllBlogs,
   getAdminBlogs,
   getBlogDetails,
+  updateBlog,
+  deleteBlog,
 };

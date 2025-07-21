@@ -5,8 +5,11 @@ import Footer from "./component/layout/Footer";
 import Header from "./component/layout/Header";
 import ProtectedRoute from "./component/Route/ProtectedRoute";
 import AllBlogs from "./pages/Admin/AllBlogs";
+import AllUsers from "./pages/Admin/AllUsers";
 import Dashboard from "./pages/Admin/Dashboard";
 import NewBlog from "./pages/Admin/NewBlog";
+import UpdateBlog from "./pages/Admin/UpdateBlog";
+import UserDetails from "./pages/Admin/UserDetails";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
 import GoogleSuccess from "./pages/Auth/GoogleSuccess";
 import Login from "./pages/Auth/Login";
@@ -93,6 +96,30 @@ const App = () => {
           element={
             <ProtectedRoute isAdmin={true}>
               <AllBlogs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/blog/:id"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <UpdateBlog />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <AllUsers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/user/:id"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <UserDetails />
             </ProtectedRoute>
           }
         />

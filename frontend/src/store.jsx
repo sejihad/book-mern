@@ -10,8 +10,10 @@ import {
   newBlogReducer,
 } from "./reducers/blogReducer";
 import {
+  allUsersReducer,
   forgotPasswordReducer,
   profileReducer,
+  userDetailsReducer,
   userReducer,
 } from "./reducers/userReducer";
 
@@ -31,6 +33,8 @@ const rootReducer = combineReducers({
   blogs: blogsReducer,
   blog: blogReducer,
   blogDetails: blogDetailsReducer,
+  allUsers: allUsersReducer,
+  userDetails: userDetailsReducer,
 });
 
 // Create persisted reducer

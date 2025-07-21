@@ -348,17 +348,67 @@ const updatePassword = catchAsyncErrors(async (req, res, next) => {
   sendToken(user, 200, res);
 });
 
+const deleteUser = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(
+      new ErrorHandler(`User does not exist with Id: ${req.params.id}`, 400)
+    );
+  }
+
+  if (user.avatar && user.avatar.public_id) {
+    try {
+      await cloudinary.uploader.destroy(user.avatar.public_id);
+    } catch (err) {
+      console.error("Cloudinary Deletion Error:", err);
+    }
+  }
+
+  await User.findByIdAndDelete(req.params.id);
+
+  res.status(200).json({
+    success: true,
+    message: "User Deleted Successfully",
+  });
+});
+
+const getAllUser = catchAsyncErrors(async (req, res, next) => {
+  const users = await User.find();
+
+  res.status(200).json({
+    success: true,
+    users,
+  });
+});
+const getSingleUser = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(
+      new ErrorHandler(`User does not exist with Id: ${req.params.id}`)
+    );
+  }
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
 module.exports = {
   registerUser,
   loginUser,
   logoutUser,
   forgotPassword,
   resetPassword,
+  getSingleUser,
   getUserDetails,
   updatePassword,
+  getAllUser,
   googleLoginCallback,
   facebookLoginCallback,
   updateProfile,
   enableTwoFactor,
   verifyOtp,
+  deleteUser,
 };

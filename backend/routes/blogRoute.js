@@ -4,6 +4,8 @@ const {
   getAllBlogs,
   getAdminBlogs,
   getBlogDetails,
+  updateBlog,
+  deleteBlog,
 } = require("../controllers/blogController");
 const { isAuthenticator, authorizeRoles } = require("../middleware/auth");
 
@@ -21,5 +23,9 @@ router.post(
   authorizeRoles("admin"),
   createBlog
 );
+router
+  .route("/admin/blog/:id")
+  .put(isAuthenticator, authorizeRoles("admin"), updateBlog)
+  .delete(isAuthenticator, authorizeRoles("admin"), deleteBlog);
 router.get("/blog/:id", getBlogDetails);
 module.exports = router;

@@ -15,6 +15,9 @@ const {
   facebookLoginCallback,
   enableTwoFactor,
   verifyOtp,
+  deleteUser,
+  getAllUser,
+  getSingleUser,
 } = require("../controllers/userController");
 const { isAuthenticator, authorizeRoles } = require("../middleware/auth");
 
@@ -64,4 +67,15 @@ router.put("/password/reset/:token", resetPassword);
 router.get("/me", isAuthenticator, getUserDetails);
 router.put("/password/update", isAuthenticator, updatePassword);
 router.put("/me/update", isAuthenticator, updateProfile);
+
+router.get(
+  "/admin/users",
+  isAuthenticator,
+  authorizeRoles("admin"),
+  getAllUser
+);
+router
+  .route("/admin/user/:id")
+  .get(isAuthenticator, authorizeRoles("admin"), getSingleUser)
+  .delete(isAuthenticator, authorizeRoles("admin"), deleteUser);
 module.exports = router;

@@ -16,6 +16,9 @@ import {
   NEW_BLOG_FAIL,
   NEW_BLOG_REQUEST,
   NEW_BLOG_SUCCESS,
+  UPDATE_BLOG_FAIL,
+  UPDATE_BLOG_REQUEST,
+  UPDATE_BLOG_SUCCESS,
 } from "../constants/blogContants";
 const API_URL = import.meta.env.VITE_API_URL;
 export const getBlog = () => async (dispatch) => {
@@ -133,6 +136,34 @@ export const deleteBlog = (id) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: DELETE_BLOG_FAIL,
+      payload: error.response.data.message,
+    });
+  }
+};
+export const updateBlog = (id, blogData) => async (dispatch) => {
+  try {
+    dispatch({ type: UPDATE_BLOG_REQUEST });
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const { data } = await axios.put(
+      `${API_URL}/api/v1/admin/blog/${id}`,
+      blogData,
+      config
+    );
+
+    dispatch({
+      type: UPDATE_BLOG_SUCCESS,
+      payload: data.success,
+    });
+  } catch (error) {
+    dispatch({
+      type: UPDATE_BLOG_FAIL,
       payload: error.response.data.message,
     });
   }

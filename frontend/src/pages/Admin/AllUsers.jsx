@@ -1,25 +1,22 @@
-// components/admin/AllBlogs.jsx
+// components/admin/AllUsers.jsx
 import { useEffect } from "react";
-import { FiEdit, FiTrash2 } from "react-icons/fi";
+import { FiEye, FiTrash2 } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import {
-  clearErrors,
-  deleteBlog,
-  getAdminBlog,
-} from "../../actions/blogAction";
+import { clearErrors, deleteUser, getAllUsers } from "../../actions/userAction";
 import Loader from "../../component/layout/Loader/Loader";
+import { DELETE_USER_RESET } from "../../constants/userContants";
 import Sidebar from "./Sidebar";
 
-const AllBlogs = () => {
+const AllUsers = () => {
   const dispatch = useDispatch();
 
-  const { blogs, error, loading } = useSelector((state) => state.blogs);
-  const { error: deleteError, isDeleted } = useSelector((state) => state.blog);
+  const { users, error, loading } = useSelector((state) => state.allUsers);
+  const { error: deleteError, isDeleted } = useSelector((state) => state.user);
 
   useEffect(() => {
-    dispatch(getAdminBlog());
+    dispatch(getAllUsers());
 
     if (error) {
       toast.error(error);
@@ -32,14 +29,15 @@ const AllBlogs = () => {
     }
 
     if (isDeleted) {
-      toast.success("Blog Deleted Successfully");
-      dispatch(getAdminBlog()); // Refresh list
+      toast.success("User Deleted Successfully");
+      dispatch(getAllUsers());
+      dispatch({ type: DELETE_USER_RESET });
     }
   }, [dispatch, error, deleteError, isDeleted]);
 
   const deleteHandler = (id) => {
-    if (window.confirm("Are you sure to delete this blog?")) {
-      dispatch(deleteBlog(id));
+    if (window.confirm("Are you sure to delete this user?")) {
+      dispatch(deleteUser(id));
     }
   };
 
@@ -56,42 +54,40 @@ const AllBlogs = () => {
 
           {/* Main Content */}
           <div className="flex-1 p-4 md:p-8">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">All Blogs</h1>
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">All Users</h1>
 
             <div className="overflow-x-auto bg-white shadow rounded-lg">
               <table className="min-w-full divide-y divide-gray-200 text-sm">
                 <thead className="bg-gray-100 text-gray-600">
                   <tr>
                     <th className="px-4 py-3 text-left font-medium">Image</th>
-                    <th className="px-4 py-3 text-left font-medium">Title</th>
+                    <th className="px-4 py-3 text-left font-medium">Name</th>
+                    <th className="px-4 py-3 text-left font-medium">Email</th>
                     <th className="px-4 py-3 text-left font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {blogs &&
-                    blogs.map((blog) => (
-                      <tr key={blog._id} className="hover:bg-gray-50">
+                  {users &&
+                    users.map((user) => (
+                      <tr key={user._id} className="hover:bg-gray-50">
                         <td className="px-4 py-3">
                           <img
-                            src={blog.image?.url || "/default.jpg"}
-                            alt="Blog"
-                            className="w-16 h-16 object-cover rounded-md"
+                            src={user.avatar?.url || "/default.jpg"}
+                            alt="User"
+                            className="w-12 h-12 object-cover rounded-full"
                           />
                         </td>
-                        <td className="px-4 py-3">
-                          {blog.title.length > 50
-                            ? blog.title.slice(0, 50) + "..."
-                            : blog.title}
-                        </td>
+                        <td className="px-4 py-3">{user.name}</td>
+                        <td className="px-4 py-3">{user.email}</td>
                         <td className="px-4 py-3 space-x-2">
                           <Link
-                            to={`/admin/blog/${blog._id}`}
-                            className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800"
+                            to={`/admin/user/${user._id}`}
+                            className="inline-flex items-center px-2 py-1 text-xs font-medium text-green-600 hover:text-green-800"
                           >
-                            <FiEdit className="mr-1" /> Edit
+                            <FiEye className="mr-1" /> Details
                           </Link>
                           <button
-                            onClick={() => deleteHandler(blog._id)}
+                            onClick={() => deleteHandler(user._id)}
                             className="inline-flex items-center px-2 py-1 text-xs font-medium cursor-pointer text-red-600 hover:text-red-800"
                           >
                             <FiTrash2 className="mr-1" /> Delete
@@ -99,13 +95,13 @@ const AllBlogs = () => {
                         </td>
                       </tr>
                     ))}
-                  {blogs?.length === 0 && (
+                  {users?.length === 0 && (
                     <tr>
                       <td
-                        colSpan="3"
+                        colSpan="4"
                         className="text-center py-6 text-gray-500"
                       >
-                        No blogs found.
+                        No users found.
                       </td>
                     </tr>
                   )}
@@ -119,4 +115,4 @@ const AllBlogs = () => {
   );
 };
 
-export default AllBlogs;
+export default AllUsers;
