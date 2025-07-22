@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { FiEye, FiTrash2 } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { clearErrors, deleteUser, getAllUsers } from "../../actions/userAction";
 import Loader from "../../component/layout/Loader/Loader";
@@ -11,9 +11,11 @@ import Sidebar from "./Sidebar";
 
 const AllUsers = () => {
   const dispatch = useDispatch();
-
+  const navigate = useNavigate();
   const { users, error, loading } = useSelector((state) => state.allUsers);
-  const { error: deleteError, isDeleted } = useSelector((state) => state.user);
+  const { error: deleteError, isDeleted } = useSelector(
+    (state) => state.profile
+  );
 
   useEffect(() => {
     dispatch(getAllUsers());
