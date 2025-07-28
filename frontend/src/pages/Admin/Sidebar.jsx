@@ -1,9 +1,11 @@
+import CategoryIcon from "@mui/icons-material/Category";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import PeopleIcon from "@mui/icons-material/People";
 import PostAddIcon from "@mui/icons-material/PostAdd";
 import RateReviewIcon from "@mui/icons-material/RateReview";
+import { FaBook } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const Sidebar = () => {
@@ -30,7 +32,20 @@ const Sidebar = () => {
         <PostAddIcon className="mr-4 text-[1.2rem]" />
         <span>Add Blog</span>
       </Link>
-
+      <Link
+        to="/admin/categories"
+        className="flex items-center text-gray-700 hover:text-red-500 hover:bg-red-100 font-normal text-base py-3 px-6 transition-all duration-300"
+      >
+        <CategoryIcon className="mr-4 text-[1.2rem]" />
+        <span>Categories</span>
+      </Link>
+      <Link
+        to="/admin/books"
+        className="flex items-center text-gray-700 hover:text-red-500 hover:bg-red-100 font-normal text-base py-3 px-6 transition-all duration-300"
+      >
+        <FaBook className="mr-4 text-[1.2rem]" />
+        <span>Books</span>
+      </Link>
       <Link
         to="/admin/orders"
         className="flex items-center text-gray-700 hover:text-red-500 hover:bg-red-100 font-normal text-base py-3 px-6 transition-all duration-300"

@@ -8,6 +8,8 @@ const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const user = require("./routes/userRoute");
 const blog = require("./routes/blogRoute");
+const category = require("./routes/categoryRoute");
+const book = require("./routes/bookRoute");
 
 dotenv.config();
 require("./config/passport");
@@ -34,7 +36,8 @@ app.use(
 
 app.use("/api/v1", user);
 app.use("/api/v1", blog);
-
+app.use("/api/v1", category);
+app.use("/api/v1", book);
 // Error Middleware
 app.use(errorMiddleware);
 

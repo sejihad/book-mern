@@ -10,6 +10,17 @@ import {
   newBlogReducer,
 } from "./reducers/blogReducer";
 import {
+  bookReducer,
+  booksReducer,
+  newBookReducer,
+} from "./reducers/bookReducer";
+import {
+  categoriesReducer,
+  categoryDetailsReducer,
+  categoryReducer,
+  newCategoryReducer,
+} from "./reducers/categoryReducer";
+import {
   allUsersReducer,
   forgotPasswordReducer,
   profileReducer,
@@ -29,12 +40,19 @@ const rootReducer = combineReducers({
   user: userReducer,
   profile: profileReducer,
   forgotPassword: forgotPasswordReducer,
+  userDetails: userDetailsReducer,
+  allUsers: allUsersReducer,
   newBlog: newBlogReducer,
   blogs: blogsReducer,
   blog: blogReducer,
   blogDetails: blogDetailsReducer,
-  allUsers: allUsersReducer,
-  userDetails: userDetailsReducer,
+  newCategory: newCategoryReducer,
+  categories: categoriesReducer,
+  category: categoryReducer,
+  categoryDetails: categoryDetailsReducer,
+  books: booksReducer,
+  newBook: newBookReducer,
+  book: bookReducer,
 });
 
 // Create persisted reducer

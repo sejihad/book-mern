@@ -7,8 +7,7 @@ const Home = () => (
     <Hero />
     <Categories />
     {/* <Authors /> */}
-    <BookSection title="Popular" />
-    <BookSection title="Fictional" />
+
     <BookSection title="New" />
   </>
 );

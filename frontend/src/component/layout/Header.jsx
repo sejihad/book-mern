@@ -7,12 +7,13 @@ import {
   FaSignInAlt,
   FaSignOutAlt,
   FaTachometerAlt,
+  FaTimes,
   FaUser,
 } from "react-icons/fa";
 import { FiMenu, FiSearch, FiShoppingBag, FiUser } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { logout } from "../../actions/userAction"; // ✅ import your logout action
+import { logout } from "../../actions/userAction";
 import logo from "../../assets/logo.png";
 
 const Header = () => {
@@ -20,8 +21,12 @@ const Header = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const userMenuRef = useRef();
+  const searchModalRef = useRef();
+  const searchInputRef = useRef();
   const dropdownTimeoutRef = useRef();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -33,10 +38,22 @@ const Header = () => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setShowUserMenu(false);
       }
+      if (
+        searchModalRef.current &&
+        !searchModalRef.current.contains(event.target)
+      ) {
+        setSearchModalOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (searchModalOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchModalOpen]);
 
   const handleCategoryEnter = () => {
     clearTimeout(dropdownTimeoutRef.current);
@@ -53,6 +70,15 @@ const Header = () => {
     dispatch(logout());
     setShowUserMenu(false);
     navigate("/login");
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchModalOpen(false);
+      setSearchQuery("");
+    }
   };
 
   return (
@@ -110,11 +136,19 @@ const Header = () => {
             <FiShoppingBag className="hover:text-green-600 transition cursor-pointer" />
           </Link>
 
+          {/* Search Icon */}
+          <button
+            onClick={() => setSearchModalOpen(true)}
+            className="md:inline cursor-pointer hover:text-green-600 transition"
+          >
+            <FiSearch />
+          </button>
+
           {/* User Menu */}
           <div ref={userMenuRef} className="relative">
             {isAuthenticated ? (
               <img
-                src={user?.avatar?.url} // Fallback image if avatar not available
+                src={user?.avatar?.url}
                 alt="User Avatar"
                 className="w-8 h-8 rounded-full cursor-pointer border hover:border-green-600 transition"
                 onClick={() => setShowUserMenu(!showUserMenu)}
@@ -200,13 +234,53 @@ const Header = () => {
               </div>
             )}
           </div>
-          <FiSearch className="hidden md:inline cursor-pointer hover:text-green-600 transition" />
           <FiMenu
             onClick={() => setMenuOpen(!menuOpen)}
             className="md:hidden cursor-pointer hover:text-green-600 transition"
           />
         </div>
       </div>
+
+      {/* Search Modal */}
+      {searchModalOpen && (
+        <div className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div
+            ref={searchModalRef}
+            className="bg-white rounded-lg shadow-xl w-full max-w-md p-6"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Search Books</h3>
+              <button
+                onClick={() => setSearchModalOpen(false)}
+                className="text-gray-500 cursor-pointer hover:text-gray-700"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <form onSubmit={handleSearch}>
+              <div className="relative">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-green-600"
+                >
+                  <FiSearch />
+                </button>
+              </div>
+              <div className="mt-4 text-sm text-gray-500">
+                <p>Press Enter to search</p>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Menu */}
       {menuOpen && (
@@ -252,6 +326,19 @@ const Header = () => {
           <Link to="/blogs" className="block hover:text-green-600">
             BLOGS
           </Link>
+
+          {/* Mobile Search */}
+          <div className="pt-2">
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                setSearchModalOpen(true);
+              }}
+              className="flex items-center gap-2 w-full text-left py-2 hover:text-green-600"
+            >
+              <FiSearch /> Search
+            </button>
+          </div>
 
           {/* Mobile User */}
           <div className="pt-2 border-t border-gray-200">

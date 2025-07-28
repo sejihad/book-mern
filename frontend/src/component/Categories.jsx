@@ -1,19 +1,23 @@
 import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import book_cat from "../assets/categories/book-cat.png";
-import ebook_cat from "../assets/categories/ebook-cat.png";
-import kids_cat from "../assets/categories/kids-cat.jpg";
-
-const categories = [
-  { name: "EBOOKS", image: book_cat },
-  { name: "FICTION", image: ebook_cat },
-  { name: "JOB SOLUTIONS", image: kids_cat },
-  { name: "KIDS", image: book_cat },
-  { name: "ROMANTIC", image: ebook_cat },
-  { name: "SKILL", image: kids_cat },
-];
-
+import { clearErrors, getCategory } from "../actions/categoryAction";
+import Loader from "./layout/Loader/Loader";
 const Categories = () => {
+  const dispatch = useDispatch();
+  const { loading, error, categories } = useSelector(
+    (state) => state.categories
+  );
+  useEffect(() => {
+    dispatch(getCategory());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearErrors());
+    }
+  }, [error, dispatch]);
   const sliderRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const startX = useRef(0);
@@ -144,44 +148,56 @@ const Categories = () => {
   }, [isDragging]);
 
   return (
-    <section className="py-10 bg-gradient-to-br from-green-50 to-white">
-      <div className="container mx-auto px-4">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-          Browse by Category
-        </h2>
-        <div
-          ref={sliderRef}
-          className="flex gap-6 overflow-x-auto scrollbar-hide px-1 md:px-4 cursor-grab select-none py-5"
-          style={{ scrollBehavior: "smooth", userSelect: "none" }}
-        >
-          {[...categories, ...categories].map((cat, i) => (
-            <Link
-              to={`/category/${encodeURIComponent(cat.name.toLowerCase())}`}
-              key={`${cat.name}-${i}`}
-              className="flex flex-col items-center min-w-[100px] sm:min-w-[120px] transition-transform hover:scale-110 hover:shadow-xl flex-shrink-0"
-              onClick={(e) => {
-                if (isDragging) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }
-              }}
+    <>
+      {loading ? (
+        <Loader />
+      ) : (
+        <section className="py-10 bg-gradient-to-br from-green-50 to-white">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+              Browse by Category
+            </h2>
+            <div
+              ref={sliderRef}
+              className="flex gap-6 overflow-x-auto scrollbar-hide px-1 md:px-4 cursor-grab select-none py-5"
+              style={{ scrollBehavior: "smooth", userSelect: "none" }}
             >
-              <div className="bg-white p-4 rounded-full shadow-md hover:ring-2 hover:ring-green-500 transition duration-300">
-                <img
-                  src={cat.image}
-                  alt={cat.name}
-                  className="w-14 h-14 object-contain"
-                  draggable="false"
-                />
-              </div>
-              <p className="mt-3 text-sm font-medium text-gray-700 text-center uppercase tracking-wide">
-                {cat.name}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
+              {categories && categories.length > 0 ? (
+                categories.map((cat, i) => (
+                  <Link
+                    to={`/books/${encodeURIComponent(cat.name.toLowerCase())}`}
+                    key={`${cat.name}-${i}`}
+                    className="flex flex-col items-center min-w-[100px] sm:min-w-[120px] transition-transform hover:scale-110 hover:shadow-xl flex-shrink-0"
+                    onClick={(e) => {
+                      if (isDragging) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }
+                    }}
+                  >
+                    <div className="bg-white p-4 rounded-full shadow-md hover:ring-2 hover:ring-green-500 transition duration-300">
+                      <img
+                        src={cat.image.url}
+                        alt={cat.name}
+                        className="w-14 h-14 object-contain"
+                        draggable="false"
+                      />
+                    </div>
+                    <p className="mt-3 text-sm font-medium text-gray-700 text-center uppercase tracking-wide">
+                      {cat.name}
+                    </p>
+                  </Link>
+                ))
+              ) : (
+                <div className="w-full text-center text-gray-500 text-sm italic">
+                  No categories available
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+    </>
   );
 };
 
