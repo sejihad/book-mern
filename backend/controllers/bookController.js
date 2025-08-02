@@ -47,8 +47,9 @@ const createBook = catchAsyncErrors(async (req, res, next) => {
           req.files.demoPdf.mimetype
         };base64,${req.files.demoPdf.data.toString("base64")}`,
         {
-          folder: "/book/demoPdfs",
-          resource_type: "raw", // Important for non-image files
+          folder: "book/demoPdfs",
+          resource_type: "raw",
+          access_mode: "public",
         }
       );
       demoPdf = {
@@ -241,51 +242,51 @@ const deleteBook = catchAsyncErrors(async (req, res, next) => {
 
 // get single product
 const getBookDetails = catchAsyncErrors(async (req, res, next) => {
-  let product = await Product.findById(req.params.id);
+  let book = await Book.findOne({ slug: req.params.slug });
 
-  if (!product) {
-    return next(new ErrorHandler("Product not found", 404));
+  if (!book) {
+    return next(new ErrorHandler("Book not found", 404));
   }
 
-  res.status(200).json({ success: true, product });
+  res.status(200).json({ success: true, book });
 });
 
 // Create New Review or Update the review
 const createBookReview = catchAsyncErrors(async (req, res, next) => {
-  const { rating, comment, productId } = req.body;
+  const { rating, comment, bookId } = req.body;
 
   const review = {
     user: req.user._id,
-    name: req.user.name,
+
     rating: Number(rating),
     comment,
   };
 
-  const product = await Product.findById(productId);
+  const book = await Book.findById(bookId);
 
-  const isReviewed = product.reviews.find(
+  const isReviewed = book.reviews.find(
     (rev) => rev.user.toString() === req.user._id.toString()
   );
 
   if (isReviewed) {
-    product.reviews.forEach((rev) => {
+    book.reviews.forEach((rev) => {
       if (rev.user.toString() === req.user._id.toString())
         (rev.rating = rating), (rev.comment = comment);
     });
   } else {
-    product.reviews.push(review);
-    product.numOfReviews = product.reviews.length;
+    book.reviews.push(review);
+    book.numOfReviews = book.reviews.length;
   }
 
   let avg = 0;
 
-  product.reviews.forEach((rev) => {
+  book.reviews.forEach((rev) => {
     avg += rev.rating;
   });
 
-  product.ratings = avg / product.reviews.length;
+  book.ratings = avg / book.reviews.length;
 
-  await product.save({ validateBeforeSave: false });
+  await book.save({ validateBeforeSave: false });
 
   res.status(200).json({
     success: true,
@@ -294,21 +295,32 @@ const createBookReview = catchAsyncErrors(async (req, res, next) => {
 
 // Get All Reviews of a product
 const getBookReviews = catchAsyncErrors(async (req, res, next) => {
-  const product = await Product.findById(req.query.id);
+  const book = await Book.findById(req.query.id)
+    .populate("reviews.user", "name image")
+    .select("reviews"); // Only return reviews for efficiency
 
-  if (!product) {
-    return next(new ErrorHandler("Product not found", 404));
+  if (!book) {
+    return next(new ErrorHandler("Book not found", 404));
   }
+
+  // Transform reviews to include formatted date and ensure consistent structure
+  const transformedReviews = book.reviews.map((review) => ({
+    ...review.toObject(),
+    createdAt: review.createdAt, // Make sure your schema has timestamps
+    user: {
+      name: review.user?.name || "Anonymous",
+      image: review.user?.image || null,
+    },
+  }));
 
   res.status(200).json({
     success: true,
-    reviews: product.reviews,
+    reviews: transformedReviews,
   });
 });
-
 // Delete Review
 const deleteReview = catchAsyncErrors(async (req, res, next) => {
-  const product = await Product.findById(req.query.productId);
+  const book = await Book.findById(req.query.productId);
 
   if (!product) {
     return next(new ErrorHandler("Product not found", 404));

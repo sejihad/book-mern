@@ -17,7 +17,7 @@ const router = express.Router();
 
 // 📚 Public Routes
 router.get("/books", getAllBooks);
-router.get("/book/:id", getBookDetails);
+router.get("/book/:slug", getBookDetails);
 
 // 🔐 Admin Routes
 router.get(
