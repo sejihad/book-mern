@@ -10,9 +10,11 @@ import {
   newBlogReducer,
 } from "./reducers/blogReducer";
 import {
+  bookDetailsReducer,
   bookReducer,
   booksReducer,
   newBookReducer,
+  newReviewReducer,
 } from "./reducers/bookReducer";
 import {
   categoriesReducer,
@@ -53,6 +55,8 @@ const rootReducer = combineReducers({
   books: booksReducer,
   newBook: newBookReducer,
   book: bookReducer,
+  bookDetails: bookDetailsReducer,
+  newReview: newReviewReducer,
 });
 
 // Create persisted reducer

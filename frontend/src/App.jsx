@@ -19,6 +19,10 @@ import Login from "./pages/Auth/Login";
 import ResetPassword from "./pages/Auth/ResetPassword";
 import BlogDetails from "./pages/Blogs/BlogDetails";
 import Blogs from "./pages/Blogs/Blogs";
+import BookPage from "./pages/Book/BookPage";
+import CatBook from "./pages/Book/CatBook";
+import BookDetails from "./pages/BookDetails/BookDetails";
+import EBookPage from "./pages/Ebook/EbookPage";
 import Home from "./pages/Home/Home";
 import NotFound from "./pages/NotFound/NotFound";
 import Orders from "./pages/Orders/Orders";
@@ -37,6 +41,10 @@ const App = () => {
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/blog/:id" element={<BlogDetails />} />
         <Route path="/shop" element={<Shop />} />
+        <Route path="/ebook" element={<EBookPage />} />
+        <Route path="/books/:category" element={<BookPage />} />
+        <Route path="/category/:category" element={<CatBook />} />
+        <Route path="/:type/:category/:slug" element={<BookDetails />} />
         <Route path="/login" element={<Login />} />
 
         <Route path="/google-success" element={<GoogleSuccess />} />

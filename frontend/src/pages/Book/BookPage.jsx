@@ -1,57 +1,26 @@
-// 📁 src/pages/Shop.jsx
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getBook } from "../../actions/bookAction";
 import BookSection from "../../component/BookSection";
 import Loader from "../../component/layout/Loader/Loader";
-// const StarRating = ({ rating }) => {
-//   const fullStars = Math.floor(rating);
-//   const halfStar = rating % 1 >= 0.5;
-//   const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
 
-//   return (
-//     <div className="flex justify-center mt-2 text-yellow-400 text-sm">
-//       {[...Array(fullStars)].map((_, i) => (
-//         <FaStar key={i} />
-//       ))}
-//       {halfStar && <FaStarHalfAlt />}
-//       {[...Array(emptyStars)].map((_, i) => (
-//         <FaRegStar key={i} />
-//       ))}
-//     </div>
-//   );
-// };
-
-const useQuery = () => {
-  return new URLSearchParams(useLocation().search);
-};
-
-const Shop = () => {
+const BookPage = () => {
   const dispatch = useDispatch();
   const { loading, books } = useSelector((state) => state.books);
+  const { category } = useParams(); // ✅ dynamic category from URL
 
-  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const booksPerPage = 15;
-
-  const query = useQuery();
 
   useEffect(() => {
     dispatch(getBook());
   }, [dispatch]);
 
-  useEffect(() => {
-    const querySearch = query.get("search") || "";
-    setSearchTerm(querySearch);
-  }, [query]);
-
   const filteredBooks = books.filter(
     (book) =>
-      book.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      book.writer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      book.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      book.type.toLowerCase().includes(searchTerm.toLowerCase())
+      book.type === "book" &&
+      book.category.toLowerCase() === category?.toLowerCase()
   );
 
   const indexOfLastBook = currentPage * booksPerPage;
@@ -64,17 +33,19 @@ const Shop = () => {
 
   return (
     <section className="container min-h-screen mx-auto px-4 py-8">
-      {/* <h2 className="text-2xl font-bold text-gray-800 mb-6">All Books</h2> */}
       {loading ? (
         <Loader />
       ) : filteredBooks.length === 0 ? (
         <div className="text-center text-gray-500 text-lg py-10">
-          No books found.
+          No books found in "{category}" category.
         </div>
       ) : (
         <>
-          {/* ✅ BookSection এ currentBooks পাঠানো */}
-          <BookSection title="All " books={currentBooks} loading={loading} />
+          <BookSection
+            title={`${category.charAt(0).toUpperCase()}${category.slice(1)}`}
+            books={currentBooks}
+            loading={loading}
+          />
 
           {/* Pagination */}
           <div className="flex justify-center mt-10">
@@ -100,4 +71,4 @@ const Shop = () => {
   );
 };
 
-export default Shop;
+export default BookPage;

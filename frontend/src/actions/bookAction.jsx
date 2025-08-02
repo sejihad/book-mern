@@ -6,6 +6,9 @@ import {
   ALL_BOOK_FAIL,
   ALL_BOOK_REQUEST,
   ALL_BOOK_SUCCESS,
+  BOOK_DETAILS_FAIL,
+  BOOK_DETAILS_REQUEST,
+  BOOK_DETAILS_SUCCESS,
   CLEAR_ERRORS,
   DELETE_BOOK_FAIL,
   DELETE_BOOK_REQUEST,
@@ -13,6 +16,9 @@ import {
   NEW_BOOK_FAIL,
   NEW_BOOK_REQUEST,
   NEW_BOOK_SUCCESS,
+  NEW_REVIEW_FAIL,
+  NEW_REVIEW_REQUEST,
+  NEW_REVIEW_SUCCESS,
   UPDATE_BOOK_FAIL,
   UPDATE_BOOK_REQUEST,
   UPDATE_BOOK_SUCCESS,
@@ -54,6 +60,23 @@ export const getAdminBook = () => async (dispatch) => {
     dispatch({
       type: ADMIN_BOOK_FAIL,
       payload: error.response.data.message,
+    });
+  }
+};
+export const getBookDetails = (slug) => async (dispatch) => {
+  try {
+    dispatch({ type: BOOK_DETAILS_REQUEST });
+
+    const { data } = await axios.get(`${API_URL}/api/v1/book/${slug}`);
+
+    dispatch({
+      type: BOOK_DETAILS_SUCCESS,
+      payload: data.book,
+    });
+  } catch (error) {
+    dispatch({
+      type: BOOK_DETAILS_FAIL,
+      payload: error.response?.data?.message || "Something went wrong",
     });
   }
 };
@@ -141,6 +164,34 @@ export const deleteBook = (id) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: DELETE_BOOK_FAIL,
+      payload: error.response.data.message,
+    });
+  }
+};
+export const newReview = (reviewData) => async (dispatch) => {
+  try {
+    dispatch({ type: NEW_REVIEW_REQUEST });
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const { data } = await axios.put(
+      `${API_URL}/api/v1/review`,
+      reviewData,
+      config
+    );
+
+    dispatch({
+      type: NEW_REVIEW_SUCCESS,
+      payload: data.success,
+    });
+  } catch (error) {
+    dispatch({
+      type: NEW_REVIEW_FAIL,
       payload: error.response.data.message,
     });
   }

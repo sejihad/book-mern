@@ -118,7 +118,9 @@ const Header = () => {
               </div>
             )}
           </div>
-
+          <Link to="/ebook" className="hover:text-green-600 transition">
+            EBOOKS
+          </Link>
           <Link to="/author" className="hover:text-green-600 transition">
             AUTHOR
           </Link>
@@ -139,7 +141,7 @@ const Header = () => {
           {/* Search Icon */}
           <button
             onClick={() => setSearchModalOpen(true)}
-            className="md:inline cursor-pointer hover:text-green-600 transition"
+            className="hidden md:inline cursor-pointer hover:text-green-600 transition"
           >
             <FiSearch />
           </button>
@@ -316,7 +318,9 @@ const Header = () => {
               </div>
             )}
           </div>
-
+          <Link to="/ebook" className="block hover:text-green-600">
+            EBOOKS
+          </Link>
           <Link to="/author" className="block hover:text-green-600">
             AUTHOR
           </Link>

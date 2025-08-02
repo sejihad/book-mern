@@ -5,6 +5,9 @@ import {
   ALL_BOOK_FAIL,
   ALL_BOOK_REQUEST,
   ALL_BOOK_SUCCESS,
+  BOOK_DETAILS_FAIL,
+  BOOK_DETAILS_REQUEST,
+  BOOK_DETAILS_SUCCESS,
   CLEAR_ERRORS,
   DELETE_BOOK_FAIL,
   DELETE_BOOK_REQUEST,
@@ -14,6 +17,10 @@ import {
   NEW_BOOK_REQUEST,
   NEW_BOOK_RESET,
   NEW_BOOK_SUCCESS,
+  NEW_REVIEW_FAIL,
+  NEW_REVIEW_REQUEST,
+  NEW_REVIEW_RESET,
+  NEW_REVIEW_SUCCESS,
   UPDATE_BOOK_FAIL,
   UPDATE_BOOK_REQUEST,
   UPDATE_BOOK_RESET,
@@ -53,7 +60,33 @@ export const booksReducer = (state = { books: [] }, action) => {
       return state;
   }
 };
+export const bookDetailsReducer = (state = { book: {} }, action) => {
+  switch (action.type) {
+    case BOOK_DETAILS_REQUEST:
+      return {
+        loading: true,
+        ...state,
+      };
+    case BOOK_DETAILS_SUCCESS:
+      return {
+        loading: false,
+        book: action.payload,
+      };
+    case BOOK_DETAILS_FAIL:
+      return {
+        loading: false,
+        error: action.payload,
+      };
 
+    case CLEAR_ERRORS:
+      return {
+        ...state,
+        error: null,
+      };
+    default:
+      return state;
+  }
+};
 export const newBookReducer = (state = { book: {} }, action) => {
   switch (action.type) {
     case NEW_BOOK_REQUEST:
@@ -124,6 +157,39 @@ export const bookReducer = (state = {}, action) => {
       return {
         ...state,
         isUpdated: false,
+      };
+    case CLEAR_ERRORS:
+      return {
+        ...state,
+        error: null,
+      };
+    default:
+      return state;
+  }
+};
+
+export const newReviewReducer = (state = {}, action) => {
+  switch (action.type) {
+    case NEW_REVIEW_REQUEST:
+      return {
+        ...state,
+        loading: true,
+      };
+    case NEW_REVIEW_SUCCESS:
+      return {
+        loading: false,
+        success: action.payload,
+      };
+    case NEW_REVIEW_FAIL:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+    case NEW_REVIEW_RESET:
+      return {
+        ...state,
+        success: false,
       };
     case CLEAR_ERRORS:
       return {

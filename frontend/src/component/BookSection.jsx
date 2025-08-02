@@ -1,10 +1,7 @@
-import { useEffect } from "react";
 import { FaRegStar, FaStar, FaStarHalfAlt } from "react-icons/fa";
-import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import { getBook } from "../actions/bookAction";
+import { Link, useNavigate } from "react-router-dom";
+import slugify from "slugify";
 import Loader from "./layout/Loader/Loader";
-
 const StarRating = ({ rating }) => {
   const fullStars = Math.floor(rating);
   const halfStar = rating % 1 >= 0.5;
@@ -23,15 +20,16 @@ const StarRating = ({ rating }) => {
   );
 };
 
-const BookSection = ({ title }) => {
-  const dispatch = useDispatch();
-  const { loading, error, books } = useSelector((state) => state.books);
-
-  useEffect(() => {
-    dispatch(getBook());
-  }, [dispatch]);
-
-  const displayedBooks = books.slice(0, 10); // ✅ সর্বোচ্চ ১০টা বই
+const BookSection = ({ title, books, loading }) => {
+  const navigate = useNavigate();
+  const handleBuyNow = (book) => {
+    navigate("/checkout", {
+      state: {
+        bookId: book._id,
+        quantity: 1,
+      },
+    });
+  };
 
   return (
     <>
@@ -52,19 +50,24 @@ const BookSection = ({ title }) => {
           </div>
 
           {/* ✅ No Books Message */}
-          {displayedBooks.length === 0 ? (
+          {books.length === 0 ? (
             <div className="text-center text-gray-500 text-lg py-10">
               No books added yet.
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-              {displayedBooks.map((book, i) => (
+              {books.map((book, i) => (
                 <div
                   key={book._id}
                   className="bg-white shadow hover:shadow-lg transition duration-300 border-amber-50"
                 >
                   <div className="relative group overflow-hidden border border-gray-200 p-2 bg-white shadow hover:shadow-lg transition duration-300">
-                    <Link to={`/category/${book.category}/${book._id}`}>
+                    <Link
+                      to={`/${book.type}/${book.category}/${slugify(book.name, {
+                        lower: true,
+                        strict: true,
+                      })}`}
+                    >
                       <img
                         src={book.image?.url}
                         alt={book.name}
@@ -93,6 +96,9 @@ const BookSection = ({ title }) => {
                     <span className="inline-block mt-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
                       {book.category}
                     </span>
+                    <span className="inline-block text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                      {book.type}
+                    </span>
                     <div className="flex items-center justify-center gap-2 mt-2 text-sm">
                       <span className="text-green-600 font-semibold">
                         ${book.discountPrice}
@@ -101,9 +107,19 @@ const BookSection = ({ title }) => {
                         ${book.oldPrice}
                       </span>
                     </div>
-                    <button className="mt-4 w-full bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold py-2 hover:from-blue-600 hover:to-green-600 transition-all duration-300 cursor-pointer">
-                      Add to Cart
-                    </button>
+                    {book.type === "ebook" && (
+                      <button
+                        onClick={() => handleBuyNow(book)}
+                        className="mt-2 w-full bg-gradient-to-r from-red-500 to-orange-500 text-white font-semibold py-2 hover:from-red-600 hover:to-orange-600 transition-all duration-300 cursor-pointer"
+                      >
+                        Buy Now
+                      </button>
+                    )}
+                    {book.type === "book" && (
+                      <button className="mt-4 w-full bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold py-2 hover:from-blue-600 hover:to-green-600 transition-all duration-300 cursor-pointer">
+                        Add to Cart
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

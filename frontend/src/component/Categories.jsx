@@ -165,7 +165,9 @@ const Categories = () => {
               {categories && categories.length > 0 ? (
                 categories.map((cat, i) => (
                   <Link
-                    to={`/books/${encodeURIComponent(cat.name.toLowerCase())}`}
+                    to={`/category/${encodeURIComponent(
+                      cat.name.toLowerCase()
+                    )}`}
                     key={`${cat.name}-${i}`}
                     className="flex flex-col items-center min-w-[100px] sm:min-w-[120px] transition-transform hover:scale-110 hover:shadow-xl flex-shrink-0"
                     onClick={(e) => {
