@@ -27,7 +27,7 @@ import BookDetails from "./pages/BookDetails/BookDetails";
 import BookCart from "./pages/Cart/BookCart";
 import EbookCart from "./pages/Cart/EbookCart";
 import PackageCart from "./pages/Cart/PackageCart";
-import EBookPage from "./pages/Ebook/EbookPage";
+import EBookPage from "./pages/Ebook/EBookPage";
 import Home from "./pages/Home/Home";
 import NotFound from "./pages/NotFound/NotFound";
 import MyOrders from "./pages/Orders/MyOrders";
