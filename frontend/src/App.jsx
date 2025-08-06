@@ -24,7 +24,7 @@ import Blogs from "./pages/Blogs/Blogs";
 import BookPage from "./pages/Book/BookPage";
 import CatBook from "./pages/Book/CatBook";
 import BookDetails from "./pages/BookDetails/BookDetails";
-import BookCart from "./pages/Cart/bookCart";
+import BookCart from "./pages/Cart/BookCart";
 import EbookCart from "./pages/Cart/EbookCart";
 import PackageCart from "./pages/Cart/PackageCart";
 import EBookPage from "./pages/Ebook/EbookPage";
