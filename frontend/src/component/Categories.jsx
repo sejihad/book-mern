@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import { clearErrors, getCategory } from "../actions/categoryAction";
 import Loader from "./layout/Loader/Loader";
 const Categories = () => {
@@ -152,7 +153,7 @@ const Categories = () => {
       {loading ? (
         <Loader />
       ) : (
-        <section className="py-10 bg-gradient-to-br from-green-50 to-white">
+        <section className="py-10 bg-gradient-to-br from-indigo-50 to-white">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
               Browse by Category
@@ -175,7 +176,7 @@ const Categories = () => {
                       }
                     }}
                   >
-                    <div className="bg-white p-4 rounded-full shadow-md hover:ring-2 hover:ring-green-500 transition duration-300">
+                    <div className="bg-white p-4 rounded-full shadow-md hover:ring-2 hover:ring-indigo-500 transition duration-300">
                       <img
                         src={cat.image.url}
                         alt={cat.name}

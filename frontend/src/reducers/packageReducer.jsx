@@ -94,6 +94,32 @@ export const packageDetailsReducer = (state = { package: {} }, action) => {
       return state;
   }
 };
+export const packageAdminDetailsReducer = (state = { package: {} }, action) => {
+  switch (action.type) {
+    case PACKAGE_DETAILS_REQUEST:
+      return {
+        loading: true,
+        ...state,
+      };
+    case PACKAGE_DETAILS_SUCCESS:
+      return {
+        loading: false,
+        package: action.payload,
+      };
+    case PACKAGE_DETAILS_FAIL:
+      return {
+        loading: false,
+        error: action.payload,
+      };
+    case CLEAR_ERRORS:
+      return {
+        ...state,
+        error: null,
+      };
+    default:
+      return state;
+  }
+};
 
 // Package Cart Reducer (for quick cart views)
 export const packageCartReducer = (state = { package: {} }, action) => {
@@ -207,7 +233,7 @@ export const packageReducer = (state = {}, action) => {
 };
 
 // Review Reducer (can be shared between books and packages)
-export const newReviewReducer = (state = {}, action) => {
+export const newPackageReviewReducer = (state = {}, action) => {
   switch (action.type) {
     case NEW_REVIEW_REQUEST:
       return {

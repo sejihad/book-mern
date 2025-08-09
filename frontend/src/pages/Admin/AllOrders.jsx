@@ -9,6 +9,7 @@ import {
   getAllOrders,
 } from "../../actions/orderAction";
 import Loader from "../../component/layout/Loader/Loader";
+import { DELETE_ORDER_RESET } from "../../constants/orderContants";
 import Sidebar from "./Sidebar";
 
 const AllOrders = () => {
@@ -32,7 +33,8 @@ const AllOrders = () => {
 
     if (isDeleted) {
       toast.success("Order Deleted Successfully");
-      dispatch(getAllOrders()); // Refresh list
+      dispatch(getAllOrders());
+      dispatch({ type: DELETE_ORDER_RESET });
     }
   }, [dispatch, error, deleteError, isDeleted]);
 
@@ -45,7 +47,7 @@ const AllOrders = () => {
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
       case "completed":
-        return "bg-green-100 text-green-800";
+        return "bg-indigo-100 text-indigo-800";
       case "in progress":
         return "bg-blue-100 text-blue-800";
       case "cancelled":
@@ -58,7 +60,7 @@ const AllOrders = () => {
   const getPaymentStatusColor = (status) => {
     switch (status.toLowerCase()) {
       case "paid":
-        return "bg-green-100 text-green-800";
+        return "bg-indigo-100 text-indigo-800";
       case "cancel":
         return "bg-red-100 text-red-800";
       default:
@@ -130,7 +132,7 @@ const AllOrders = () => {
                         </td>
                         <td className="px-4 py-3 space-x-2">
                           <Link
-                            to={`/order/${order._id}`}
+                            to={`/admin/order/${order._id}`}
                             className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800"
                           >
                             <FiEye className="mr-1" /> View

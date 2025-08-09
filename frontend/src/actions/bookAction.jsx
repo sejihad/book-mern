@@ -6,6 +6,9 @@ import {
   ALL_BOOK_FAIL,
   ALL_BOOK_REQUEST,
   ALL_BOOK_SUCCESS,
+  ALL_REVIEW_FAIL,
+  ALL_REVIEW_REQUEST,
+  ALL_REVIEW_SUCCESS,
   BOOK_DETAILS_FAIL,
   BOOK_DETAILS_REQUEST,
   BOOK_DETAILS_SUCCESS,
@@ -13,6 +16,9 @@ import {
   DELETE_BOOK_FAIL,
   DELETE_BOOK_REQUEST,
   DELETE_BOOK_SUCCESS,
+  DELETE_REVIEW_FAIL,
+  DELETE_REVIEW_REQUEST,
+  DELETE_REVIEW_SUCCESS,
   NEW_BOOK_FAIL,
   NEW_BOOK_REQUEST,
   NEW_BOOK_SUCCESS,
@@ -68,6 +74,31 @@ export const getBookDetails = (slug) => async (dispatch) => {
     dispatch({ type: BOOK_DETAILS_REQUEST });
 
     const { data } = await axios.get(`${API_URL}/api/v1/book/${slug}`);
+
+    dispatch({
+      type: BOOK_DETAILS_SUCCESS,
+      payload: data.book,
+    });
+  } catch (error) {
+    dispatch({
+      type: BOOK_DETAILS_FAIL,
+      payload: error.response?.data?.message || "Something went wrong",
+    });
+  }
+};
+export const getAdminBookDetails = (id) => async (dispatch) => {
+  try {
+    dispatch({ type: BOOK_DETAILS_REQUEST });
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    const { data } = await axios.get(
+      `${API_URL}/api/v1/admin/book/${id}`,
+      config
+    );
 
     dispatch({
       type: BOOK_DETAILS_SUCCESS,
@@ -192,6 +223,69 @@ export const newReview = (reviewData) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: NEW_REVIEW_FAIL,
+      payload: error.response.data.message,
+    });
+  }
+};
+
+export const getReviews = (type, id) => async (dispatch) => {
+  if (type === "book" || type === "ebook") {
+    type = "book";
+  } else if (type === "package") {
+    type = "package";
+  }
+  try {
+    dispatch({ type: ALL_REVIEW_REQUEST });
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    const { data } = await axios.get(
+      `${API_URL}/api/v1/${type}/reviews/${id}`,
+      config
+    );
+
+    dispatch({
+      type: ALL_REVIEW_SUCCESS,
+      payload: data.reviews,
+    });
+  } catch (error) {
+    dispatch({
+      type: ALL_REVIEW_FAIL,
+      payload: error.response.data.message,
+    });
+  }
+};
+
+// Delete Review of a Product
+export const deleteReview = (type, productId, reviewId) => async (dispatch) => {
+  if (type === "book" || type === "ebook") {
+    type = "book";
+  } else if (type === "package") {
+    type = "package";
+  }
+  try {
+    dispatch({ type: DELETE_REVIEW_REQUEST });
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    const { data } = await axios.delete(
+      `${API_URL}/api/v1/${type}/review/${productId}/${reviewId}`,
+      config
+    );
+
+    dispatch({
+      type: DELETE_REVIEW_SUCCESS,
+      payload: data.success,
+    });
+  } catch (error) {
+    dispatch({
+      type: DELETE_REVIEW_FAIL,
       payload: error.response.data.message,
     });
   }

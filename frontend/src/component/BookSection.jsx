@@ -64,7 +64,7 @@ const BookSection = ({ title, books, loading }) => {
         <section className="container mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">
-              {title} <span className="text-green-600">Books</span>
+              {title} <span className="text-indigo-600">Books</span>
             </h2>
             <Link
               to="/shop"
@@ -100,7 +100,7 @@ const BookSection = ({ title, books, loading }) => {
                       />
                     </Link>
                     {book.oldPrice > book.discountPrice && (
-                      <span className="absolute top-3 left-3 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow">
+                      <span className="absolute top-3 left-3 bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow">
                         -
                         {Math.round(
                           ((book.oldPrice - book.discountPrice) /
@@ -118,14 +118,14 @@ const BookSection = ({ title, books, loading }) => {
                     </h3>
                     <p className="text-sm text-gray-500">{book.writer}</p>
                     <StarRating rating={book.ratings} />
-                    <span className="inline-block mt-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                    <span className="inline-block mt-2 text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
                       {book.category}
                     </span>
                     <span className="inline-block text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
                       {book.type}
                     </span>
                     <div className="flex items-center justify-center gap-2 mt-2 text-sm">
-                      <span className="text-green-600 font-semibold">
+                      <span className="text-indigo-600 font-semibold">
                         ${book.discountPrice}
                       </span>
                       <span className="line-through text-gray-400">
@@ -144,7 +144,7 @@ const BookSection = ({ title, books, loading }) => {
                             quantity: 1,
                           })
                         }
-                        className="mt-2 w-full bg-gradient-to-r from-green-500 to-green-500 text-white font-semibold py-2 hover:from-green-600 hover:to-green-600 transition-all duration-300 cursor-pointer"
+                        className="mt-2 w-full bg-gradient-to-r from-indigo-500 to-indigo-500 text-white font-semibold py-2 hover:from-indigo-600 hover:to-indigo-600 transition-all duration-300 cursor-pointer"
                       >
                         Buy Now
                       </button>
@@ -153,7 +153,7 @@ const BookSection = ({ title, books, loading }) => {
                     {book.type === "ebook" && (
                       <button
                         onClick={() => addToCartEbookHandler(book._id, 1)}
-                        className="mt-4 w-full bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold py-2 hover:from-blue-600 hover:to-green-600 transition-all duration-300 cursor-pointer"
+                        className="mt-4 w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold py-2 hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 cursor-pointer"
                       >
                         Add to Cart
                       </button>
@@ -161,7 +161,7 @@ const BookSection = ({ title, books, loading }) => {
                     {book.type === "book" && (
                       <button
                         onClick={() => addToCartBookHandler(book._id, 1)}
-                        className="mt-4 w-full bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold py-2 hover:from-blue-600 hover:to-green-600 transition-all duration-300 cursor-pointer"
+                        className="mt-4 w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold py-2 hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 cursor-pointer"
                       >
                         Add to Cart
                       </button>

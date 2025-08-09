@@ -6,6 +6,7 @@ const {
   getBlogDetails,
   updateBlog,
   deleteBlog,
+  getAdminBlogDetails,
 } = require("../controllers/blogController");
 const { isAuthenticator, authorizeRoles } = require("../middleware/auth");
 
@@ -26,6 +27,7 @@ router.post(
 
 router
   .route("/admin/blog/:id")
+  .get(isAuthenticator, authorizeRoles("admin"), getAdminBlogDetails)
   .put(isAuthenticator, authorizeRoles("admin"), updateBlog)
   .delete(isAuthenticator, authorizeRoles("admin"), deleteBlog);
 router.get("/blog/:slug", getBlogDetails);

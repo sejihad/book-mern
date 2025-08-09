@@ -6,8 +6,9 @@ const {
   updatePackage,
   deletePackage,
   createPackageReview,
-  getPackageReviews,
+  getReviews,
   deleteReview,
+  getAdminPackageDetails,
   getAdminPackages,
   getPackageCart,
 } = require("../controllers/packageController");
@@ -38,15 +39,16 @@ router.post(
 
 router
   .route("/admin/package/:id")
+  .get(isAuthenticator, authorizeRoles("admin"), getAdminPackageDetails)
   .put(isAuthenticator, authorizeRoles("admin"), updatePackage)
   .delete(isAuthenticator, authorizeRoles("admin"), deletePackage);
 
 // ⭐️ Review Routes
 router.put("/review/package", isAuthenticator, createPackageReview);
 
+router.route("/package/reviews/:id").get(isAuthenticator, getReviews);
 router
-  .route("/reviews/package")
-  .get(getPackageReviews)
+  .route("/package/review/:packageId/:reviewId")
   .delete(isAuthenticator, deleteReview);
 
 module.exports = router;

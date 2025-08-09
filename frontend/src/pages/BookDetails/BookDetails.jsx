@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import { getBook, getBookDetails, newReview } from "../../actions/bookAction";
 import { addItemsBookToCart } from "../../actions/bookCartAction";
 import { addItemsEbookToCart } from "../../actions/ebookCartAction";
+import { myOrders } from "../../actions/orderAction";
 import BookSection from "../../component/BookSection";
 import Loader from "../../component/layout/Loader/Loader";
 import { NEW_REVIEW_RESET } from "../../constants/bookConstants";
@@ -67,6 +68,7 @@ const BookDetails = () => {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { loading, book } = useSelector((state) => state.bookDetails);
+  const { orders } = useSelector((state) => state.myOrders);
   const { books } = useSelector((state) => state.books);
   const { user } = useSelector((state) => state.user);
   const { success: reviewSuccess } = useSelector((state) => state.newReview);
@@ -79,6 +81,7 @@ const BookDetails = () => {
   useEffect(() => {
     dispatch(getBookDetails(slug));
     dispatch(getBook());
+    dispatch(myOrders());
     if (reviewSuccess) {
       dispatch(getBookDetails(slug));
       toast.success("Review Created Success");
@@ -96,7 +99,7 @@ const BookDetails = () => {
     navigate("/ebook/cart");
     toast.success("Item Added To Cart");
   };
-
+  const hasReviewed = book?.reviews?.some((r) => r.user === user?._id);
   const handleBuyNow = (type, item) => {
     if (!user) {
       navigate("/login");
@@ -128,6 +131,11 @@ const BookDetails = () => {
   if (loading || !book) return <Loader />;
 
   const allImages = [book.image, ...(book.images || [])].filter(Boolean);
+  const hasCompletedOrder = orders?.some(
+    (order) =>
+      order.order_status === "completed" &&
+      order.orderItems?.some((item) => item.id === book._id)
+  );
 
   // Get related books (same category, excluding current book)
   const relatedBooks = books
@@ -164,7 +172,7 @@ const BookDetails = () => {
                     onClick={() => setSelectedImage(index)}
                     className={`flex-shrink-0 w-12 h-12 rounded border ${
                       selectedImage === index
-                        ? "border-green-500"
+                        ? "border-indigo-500"
                         : "border-gray-300"
                     }`}
                   >
@@ -182,7 +190,7 @@ const BookDetails = () => {
             {book.demoPdf && (
               <button
                 onClick={() => setShowPdf(true)}
-                className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md transition"
+                className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md transition"
               >
                 Read Sample PDF
               </button>
@@ -261,7 +269,7 @@ const BookDetails = () => {
         <div className="md:col-span-1">
           <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 sticky top-4">
             <div className="flex items-center mb-4">
-              <span className="text-2xl font-bold text-green-600">
+              <span className="text-2xl font-bold text-indigo-600">
                 ${book.discountPrice}
               </span>
               {book.oldPrice > book.discountPrice && (
@@ -316,7 +324,7 @@ const BookDetails = () => {
                 <div className="space-y-3">
                   <button
                     onClick={addToCartBookHandler}
-                    className="w-full flex items-center justify-center py-2 px-4 rounded-md font-medium text-white bg-green-600 hover:bg-green-700 transition"
+                    className="w-full flex items-center justify-center py-2 px-4 rounded-md font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition"
                   >
                     <FaShoppingCart className="mr-2" />
                     Add to Cart
@@ -332,7 +340,7 @@ const BookDetails = () => {
                         type: book.type,
                       })
                     }
-                    className="w-full py-2 px-4 rounded-md font-medium text-white bg-green-600 hover:bg-green-700 transition"
+                    className="w-full py-2 px-4 rounded-md font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition"
                   >
                     Buy Now
                   </button>
@@ -342,7 +350,7 @@ const BookDetails = () => {
               <div className="space-y-3">
                 <button
                   onClick={addToCartEbookHandler}
-                  className="w-full flex items-center justify-center py-2 px-4 rounded-md font-medium text-white bg-green-600 hover:bg-green-700 transition"
+                  className="w-full flex items-center justify-center py-2 px-4 rounded-md font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition"
                 >
                   <FaShoppingCart className="mr-2" />
                   Add to Cart
@@ -390,7 +398,7 @@ const BookDetails = () => {
         </h2>
 
         {/* Review Form */}
-        {user && (
+        {user && hasCompletedOrder && !hasReviewed && (
           <div className="mb-8">
             <h3 className="text-lg font-semibold mb-2">Write a Review</h3>
             <div className="space-y-4">
@@ -417,7 +425,7 @@ const BookDetails = () => {
               <button
                 onClick={submitReview}
                 disabled={review.rating === 0 || !review.comment.trim()}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md disabled:bg-gray-400"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md disabled:bg-gray-400"
               >
                 Submit Review
               </button>

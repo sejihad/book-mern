@@ -82,7 +82,7 @@ const createPackage = catchAsyncErrors(async (req, res, next) => {
         `data:${file.mimetype};base64,${file.data.toString("base64")}`,
       {
         folder: "/package/packages",
-        resource_type: "auto",
+        resource_type: "image",
       }
     );
     image = {
@@ -108,7 +108,7 @@ const createPackage = catchAsyncErrors(async (req, res, next) => {
             `data:${file.mimetype};base64,${file.data.toString("base64")}`,
           {
             folder: "/package/additional_images",
-            resource_type: "auto",
+            resource_type: "image",
           }
         );
         images.push({
@@ -122,28 +122,6 @@ const createPackage = catchAsyncErrors(async (req, res, next) => {
   }
 
   // Upload demoPdf files for each book
-  for (const bookNum of ["book1", "book2", "book3"]) {
-    const demoPdfField = `books[${bookNum}][demoPdf]`;
-    if (req.files[demoPdfField]) {
-      try {
-        const file = req.files[demoPdfField][0] || req.files[demoPdfField];
-        const pdfResult = await cloudinary.uploader.upload(
-          file.tempFilePath ||
-            `data:${file.mimetype};base64,${file.data.toString("base64")}`,
-          {
-            folder: `/package/demo_pdfs/${bookNum}`,
-            resource_type: "raw",
-          }
-        );
-        booksData[bookNum].demoPdf = {
-          public_id: pdfResult.public_id,
-          url: pdfResult.secure_url,
-        };
-      } catch (err) {
-        console.error(`${bookNum} demoPdf upload failed`, err);
-      }
-    }
-  }
 
   // Create package
   const packageData = {
@@ -178,6 +156,11 @@ const updatePackage = catchAsyncErrors(async (req, res, next) => {
       message: "Package not found",
     });
   }
+  const booksData = package.books || {
+    book1: {},
+    book2: {},
+    book3: {},
+  };
 
   // Handle image update
   if (req.files?.image) {
@@ -243,12 +226,52 @@ const updatePackage = catchAsyncErrors(async (req, res, next) => {
       console.error("Additional images update error:", error);
     }
   }
+  for (const bookNum of ["book1", "book2", "book3"]) {
+    const demoPdfField = `books[${bookNum}][demoPdf]`;
+
+    if (req.files && req.files[demoPdfField]) {
+      // পুরানো demoPdf ডিলিট
+      if (booksData[bookNum]?.demoPdf?.public_id) {
+        await cloudinary.uploader.destroy(
+          booksData[bookNum].demoPdf.public_id,
+          { resource_type: "raw" }
+        );
+      }
+
+      const file = Array.isArray(req.files[demoPdfField])
+        ? req.files[demoPdfField][0]
+        : req.files[demoPdfField];
+
+      const pdfResult = await cloudinary.uploader.upload(
+        file.tempFilePath ||
+          `data:${file.mimetype};base64,${file.data.toString("base64")}`,
+        {
+          folder: `/package/demo_pdfs/${bookNum}`,
+          resource_type: "raw",
+        }
+      );
+
+      booksData[bookNum].demoPdf = {
+        public_id: pdfResult.public_id,
+        url: pdfResult.secure_url,
+      };
+    } else if (
+      typeof req.body.books?.[bookNum]?.demoPdf === "string" &&
+      req.body.books[bookNum].demoPdf.startsWith("http")
+    ) {
+      // পুরানো URL থেকে আসলে আগের মতো রেখে দিবে
+      booksData[bookNum].demoPdf = booksData[bookNum].demoPdf || null;
+    } else {
+      // demoPdf ফাইল না এলে আগেরটা রেখে দিবে, null/set করবে না
+      booksData[bookNum].demoPdf = booksData[bookNum].demoPdf || null;
+    }
+  }
 
   // Handle slug update if name changed
   if (req.body.name && req.body.name !== package.name) {
     req.body.slug = slugify(req.body.name, { lower: true, strict: true });
   }
-
+  req.body.books = booksData;
   // Update package
   const updatedPackage = await Package.findByIdAndUpdate(packageId, req.body, {
     new: true,
@@ -338,6 +361,18 @@ const getPackageDetails = catchAsyncErrors(async (req, res, next) => {
     package: packageData,
   });
 });
+const getAdminPackageDetails = catchAsyncErrors(async (req, res, next) => {
+  const packageData = await Package.findById(req.params.id);
+
+  if (!packageData) {
+    return next(new ErrorHandler("Package not found", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    package: packageData,
+  });
+});
 
 // Get Package for Cart
 const getPackageCart = catchAsyncErrors(async (req, res, next) => {
@@ -393,40 +428,29 @@ const createPackageReview = catchAsyncErrors(async (req, res, next) => {
 });
 
 // Get All Reviews of a Package
-const getPackageReviews = catchAsyncErrors(async (req, res, next) => {
-  const package = await Package.findById(req.query.id)
-    .populate("reviews.user", "name image")
-    .select("reviews");
+const getReviews = catchAsyncErrors(async (req, res, next) => {
+  const package = await Package.findById(req.params.id);
 
   if (!package) {
     return next(new ErrorHandler("Package not found", 404));
   }
 
-  const transformedReviews = package.reviews.map((review) => ({
-    ...review.toObject(),
-    createdAt: review.createdAt,
-    user: {
-      name: review.user?.name || "Anonymous",
-      image: review.user?.image || null,
-    },
-  }));
-
   res.status(200).json({
     success: true,
-    reviews: transformedReviews,
+    reviews: package.reviews,
   });
 });
 
 // Delete Review
 const deleteReview = catchAsyncErrors(async (req, res, next) => {
-  const package = await Package.findById(req.query.packageId);
+  const package = await Package.findById(req.params.packageId);
 
   if (!package) {
     return next(new ErrorHandler("Package not found", 404));
   }
 
   const reviews = package.reviews.filter(
-    (rev) => rev._id.toString() !== req.query.id.toString()
+    (rev) => rev._id.toString() !== req.params.reviewId.toString()
   );
 
   let avg = 0;
@@ -446,7 +470,7 @@ const deleteReview = catchAsyncErrors(async (req, res, next) => {
   const numOfReviews = reviews.length;
 
   await Package.findByIdAndUpdate(
-    req.query.packageId,
+    req.params.packageId,
     {
       reviews,
       ratings,
@@ -471,8 +495,9 @@ module.exports = {
   deletePackage,
   getPackageDetails,
   createPackageReview,
-  getPackageReviews,
+  getReviews,
   deleteReview,
   getAdminPackages,
   getPackageCart,
+  getAdminPackageDetails,
 };

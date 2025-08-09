@@ -46,11 +46,25 @@ const Sidebar = () => {
         <span>Shipping</span>
       </Link>
       <Link
+        to="/admin/book/new"
+        className="flex items-center text-gray-700 hover:text-red-500 hover:bg-red-100 font-normal text-base py-3 px-6 transition-all duration-300"
+      >
+        <PostAddIcon className="mr-4 text-[1.2rem]" />
+        <span>Add Book</span>
+      </Link>
+      <Link
         to="/admin/books"
         className="flex items-center text-gray-700 hover:text-red-500 hover:bg-red-100 font-normal text-base py-3 px-6 transition-all duration-300"
       >
         <FaBook className="mr-4 text-[1.2rem]" />
         <span>Books</span>
+      </Link>
+      <Link
+        to="/admin/package/new"
+        className="flex items-center text-gray-700 hover:text-red-500 hover:bg-red-100 font-normal text-base py-3 px-6 transition-all duration-300"
+      >
+        <PostAddIcon className="mr-4 text-[1.2rem]" />
+        <span>Add Package</span>
       </Link>
       <Link
         to="/admin/packages"

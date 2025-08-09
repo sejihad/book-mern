@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import {
   FaAngleDown,
+  FaCloudDownloadAlt,
   FaCog,
-  FaCreditCard,
   FaShoppingBag,
   FaShoppingCart,
   FaSignInAlt,
@@ -123,7 +123,7 @@ const Header = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-700">
-          <Link to="/" className="hover:text-green-600 transition">
+          <Link to="/" className="hover:text-indigo-600 transition">
             HOME
           </Link>
 
@@ -132,7 +132,7 @@ const Header = () => {
             onMouseEnter={handleCategoryEnter}
             onMouseLeave={handleCategoryLeave}
           >
-            <button className="flex items-center gap-1 hover:text-green-600 transition cursor-pointer">
+            <button className="flex items-center gap-1 hover:text-indigo-600 transition cursor-pointer">
               BOOKS <FaAngleDown className="mt-[1px]  " />
             </button>
             {showCategories && (
@@ -150,19 +150,19 @@ const Header = () => {
               </div>
             )}
           </div>
-          <Link to="/ebook" className="hover:text-green-600 transition">
+          <Link to="/ebook" className="hover:text-indigo-600 transition">
             EBOOKS
           </Link>
-          <Link to="/packages" className="hover:text-green-600 transition">
+          <Link to="/packages" className="hover:text-indigo-600 transition">
             PACKAGES
           </Link>
-          <Link to="/author" className="hover:text-green-600 transition">
+          <Link to="/author" className="hover:text-indigo-600 transition">
             AUTHOR
           </Link>
-          <Link to="/shop" className="hover:text-green-600 transition">
+          <Link to="/shop" className="hover:text-indigo-600 transition">
             SHOP
           </Link>
-          <Link to="/blogs" className="hover:text-green-600 transition">
+          <Link to="/blogs" className="hover:text-indigo-600 transition">
             BLOGS
           </Link>
         </div>
@@ -172,7 +172,7 @@ const Header = () => {
           <div className="relative">
             <FiShoppingBag
               onClick={() => setShowCartMenu(!showCartMenu)}
-              className="hover:text-green-600 transition cursor-pointer text-2xl"
+              className="hover:text-indigo-600 transition cursor-pointer text-2xl"
             />
             {cartItemCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
@@ -185,19 +185,19 @@ const Header = () => {
                 <div className="flex flex-col">
                   <Link
                     to="/book/cart"
-                    className="flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-green-700 transition-colors duration-200 rounded-md"
+                    className="flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-indigo-700 transition-colors duration-200 rounded-md"
                   >
                     <span className="flex items-center gap-2">
                       <FaShoppingCart /> Book Cart
                     </span>
-                    <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                    <span className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-2 py-0.5 rounded-full">
                       {bookCartCount}
                     </span>
                   </Link>
 
                   <Link
                     to="/ebook/cart"
-                    className="flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-green-700 transition-colors duration-200 rounded-md"
+                    className="flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-indigo-700 transition-colors duration-200 rounded-md"
                   >
                     <span className="flex items-center gap-2">
                       <FaShoppingCart /> Ebook Cart
@@ -209,7 +209,7 @@ const Header = () => {
 
                   <Link
                     to="/package/cart"
-                    className="flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-green-700 transition-colors duration-200 rounded-md"
+                    className="flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-indigo-700 transition-colors duration-200 rounded-md"
                   >
                     <span className="flex items-center gap-2">
                       <FaShoppingCart /> Package Cart
@@ -226,7 +226,7 @@ const Header = () => {
           {/* Search Icon */}
           <button
             onClick={() => setSearchModalOpen(true)}
-            className="hidden md:inline cursor-pointer hover:text-green-600 transition"
+            className="hidden md:inline cursor-pointer hover:text-indigo-600 transition"
           >
             <FiSearch />
           </button>
@@ -237,12 +237,12 @@ const Header = () => {
               <img
                 src={user?.avatar?.url}
                 alt="User Avatar"
-                className="w-8 h-8 rounded-full cursor-pointer border hover:border-green-600 transition"
+                className="w-8 h-8 rounded-full cursor-pointer border hover:border-indigo-600 transition"
                 onClick={() => setShowUserMenu(!showUserMenu)}
               />
             ) : (
               <FiUser
-                className="cursor-pointer hover:text-green-600 transition"
+                className="cursor-pointer hover:text-indigo-600 transition"
                 onClick={() => {
                   if (!isAuthenticated) {
                     navigate("/login");
@@ -261,7 +261,7 @@ const Header = () => {
                       <Link
                         to="/admin/dashboard"
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-green-700 transition-colors duration-200 rounded-md"
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-indigo-700 transition-colors duration-200 rounded-md"
                       >
                         <FaTachometerAlt /> Dashboard
                       </Link>
@@ -269,7 +269,7 @@ const Header = () => {
                     <Link
                       to="/profile"
                       onClick={() => setShowUserMenu(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-green-700 transition-colors duration-200 rounded-md"
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-indigo-700 transition-colors duration-200 rounded-md"
                     >
                       <FaUser /> Profile
                     </Link>
@@ -277,22 +277,29 @@ const Header = () => {
                       <Link
                         to="/profile/setting"
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-green-700 transition-colors duration-200 rounded-md"
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-indigo-700 transition-colors duration-200 rounded-md"
                       >
                         <FaCog /> Setting
                       </Link>
                     )}
-                    <Link
+                    {/* <Link
                       to="/payments"
                       onClick={() => setShowUserMenu(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-green-700 transition-colors duration-200 rounded-md"
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-indigo-700 transition-colors duration-200 rounded-md"
                     >
                       <FaCreditCard /> Payments
+                    </Link> */}
+                    <Link
+                      to="/ebook-library"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-indigo-700 transition-colors duration-200 rounded-md"
+                    >
+                      <FaCloudDownloadAlt /> E-Book Library
                     </Link>
                     <Link
                       to="/orders"
                       onClick={() => setShowUserMenu(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-green-700 transition-colors duration-200 rounded-md"
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-indigo-700 transition-colors duration-200 rounded-md"
                     >
                       <FaShoppingBag /> Orders
                     </Link>
@@ -313,7 +320,7 @@ const Header = () => {
                       setShowUserMenu(false);
                       navigate("/login");
                     }}
-                    className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-green-100 hover:text-green-700 transition-colors duration-200 rounded-md"
+                    className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200 rounded-md"
                   >
                     <FaSignInAlt /> Login
                   </button>
@@ -323,7 +330,7 @@ const Header = () => {
           </div>
           <FiMenu
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden cursor-pointer hover:text-green-600 transition"
+            className="md:hidden cursor-pointer hover:text-indigo-600 transition"
           />
         </div>
       </div>
@@ -350,13 +357,13 @@ const Header = () => {
                   ref={searchInputRef}
                   type="text"
                   placeholder="Search..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
                 <button
                   type="submit"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-green-600"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-indigo-600"
                 >
                   <FiSearch />
                 </button>
@@ -372,13 +379,13 @@ const Header = () => {
       {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden bg-white px-4 pb-4 pt-2 text-gray-700 text-sm font-semibold shadow-inner space-y-2">
-          <Link to="/" className="block hover:text-green-600">
+          <Link to="/" className="block hover:text-indigo-600">
             HOME
           </Link>
 
           <div>
             <button
-              className="flex justify-between w-full hover:text-green-600"
+              className="flex justify-between w-full hover:text-indigo-600"
               onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
             >
               BOOKS{" "}
@@ -394,7 +401,7 @@ const Header = () => {
                   <Link
                     key={cat._id}
                     to={`/books/${cat.slug}`}
-                    className="block hover:text-green-600"
+                    className="block hover:text-indigo-600"
                     onClick={() => setMenuOpen(false)}
                   >
                     {cat.name}
@@ -403,19 +410,19 @@ const Header = () => {
               </div>
             )}
           </div>
-          <Link to="/ebook" className="block hover:text-green-600">
+          <Link to="/ebook" className="block hover:text-indigo-600">
             EBOOKS
           </Link>
-          <Link to="/packages" className="block hover:text-green-600">
+          <Link to="/packages" className="block hover:text-indigo-600">
             PACKAGES
           </Link>
-          <Link to="/author" className="block hover:text-green-600">
+          <Link to="/author" className="block hover:text-indigo-600">
             AUTHOR
           </Link>
-          <Link to="/shop" className="block hover:text-green-600">
+          <Link to="/shop" className="block hover:text-indigo-600">
             SHOP
           </Link>
-          <Link to="/blogs" className="block hover:text-green-600">
+          <Link to="/blogs" className="block hover:text-indigo-600">
             BLOGS
           </Link>
 
@@ -426,7 +433,7 @@ const Header = () => {
                 setMenuOpen(false);
                 setSearchModalOpen(true);
               }}
-              className="flex items-center gap-2 w-full text-left py-2 hover:text-green-600"
+              className="flex items-center gap-2 w-full text-left py-2 hover:text-indigo-600"
             >
               <FiSearch /> Search
             </button>
@@ -450,7 +457,7 @@ const Header = () => {
                   setMenuOpen(false);
                   navigate("/login");
                 }}
-                className="block w-full text-left py-2 hover:text-green-600"
+                className="block w-full text-left py-2 hover:text-indigo-600"
               >
                 Login
               </button>

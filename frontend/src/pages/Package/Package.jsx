@@ -154,7 +154,7 @@ const PackagesPage = () => {
                           </span>
                         </div>
                         <div className="flex items-center">
-                          <FaBox className="mr-2 text-green-500" />
+                          <FaBox className="mr-2 text-indigo-500" />
                           <span>{pkg.deliveryTime || "Standard shipping"}</span>
                         </div>
                       </div>
@@ -162,7 +162,7 @@ const PackagesPage = () => {
                       {/* Price */}
                       <div className="mt-3 flex items-center justify-between">
                         <div>
-                          <span className="text-lg font-bold text-green-600">
+                          <span className="text-lg font-bold text-indigo-600">
                             ${pkg.discountPrice}
                           </span>
                           {pkg.oldPrice > pkg.discountPrice && (
@@ -186,13 +186,13 @@ const PackagesPage = () => {
                               type: "package",
                             })
                           }
-                          className="w-full bg-gradient-to-r from-green-500 to-green-500 text-white font-medium py-2 rounded hover:from-green-600 hover:to-green-600 transition"
+                          className="w-full bg-gradient-to-r from-indigo-500 to-indigo-500 text-white font-medium py-2 rounded hover:from-indigo-600 hover:to-indigo-600 transition"
                         >
                           Buy Now
                         </button>
                         <button
                           onClick={() => addToCartHandler(pkg._id, 1)}
-                          className="w-full bg-gradient-to-r from-blue-500 to-green-500 text-white font-medium py-2 rounded hover:from-blue-600 hover:to-green-600 transition"
+                          className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-medium py-2 rounded hover:from-blue-600 hover:to-indigo-600 transition"
                         >
                           Add to Cart
                         </button>

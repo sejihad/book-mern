@@ -1,7 +1,6 @@
 const dotenv = require("dotenv");
-const ServiceOrder = require("../models/orderModel");
+const Order = require("../models/orderModel");
 const User = require("../models/userModel");
-
 const paypal = require("@paypal/checkout-server-sdk");
 
 dotenv.config();
@@ -10,11 +9,17 @@ const environment = new paypal.core.SandboxEnvironment(
   process.env.PAYPAL_CLIENT_ID,
   process.env.PAYPAL_CLIENT_SECRET
 );
+// const environment = new paypal.core.LiveEnvironment(
+//   process.env.PAYPAL_CLIENT_ID, // Use LIVE PayPal Client ID
+//   process.env.PAYPAL_CLIENT_SECRET // Use LIVE PayPal Secret
+// );
 const client = new paypal.core.PayPalHttpClient(environment);
 
-const createCheckoutSession = async (req, res, next) => {
+// Create PayPal Checkout Session
+const createPaypalCheckoutSession = async (req, res, next) => {
   try {
-    const { title, price, name, serviceId } = req.body;
+    const { shippingInfo, orderItems, itemsPrice, shippingPrice, totalPrice } =
+      req.body;
 
     const request = new paypal.orders.OrdersCreateRequest();
     request.prefer("return=representation");
@@ -24,19 +29,31 @@ const createCheckoutSession = async (req, res, next) => {
         {
           amount: {
             currency_code: "USD",
-            value: price.toFixed(2),
+            value: Number(totalPrice).toFixed(2),
           },
-          custom_id: serviceId,
-          description: `${title} - ${name}`,
+          description: "Book Store Order Payment",
         },
       ],
       application_context: {
-        return_url: `${process.env.CLIENT_BASE_URL}/paypal-success`,
-        cancel_url: `${process.env.CLIENT_BASE_URL}/paypal-cancel`,
+        return_url: `${process.env.FRONTEND_URL}/paypal-success`,
+        cancel_url: `${process.env.FRONTEND_URL}/payment-cancel`,
       },
     });
 
+    // store data in your DB or cache keyed by order ID for retrieval after payment
     const order = await client.execute(request);
+
+    // Save metadata temporarily (can also store in DB with orderId)
+    req.session = req.session || {};
+    req.session[order.result.id] = {
+      userId: req.user._id.toString(),
+      shippingInfo,
+      orderItems,
+      itemsPrice,
+      shippingPrice,
+      totalPrice,
+    };
+
     res.status(200).json({ id: order.result.id });
   } catch (err) {
     console.error("❌ PayPal order creation failed:", err);
@@ -44,6 +61,7 @@ const createCheckoutSession = async (req, res, next) => {
   }
 };
 
+// Capture PayPal Payment
 const capturePaypalOrder = async (req, res) => {
   const { orderID } = req.body;
 
@@ -52,48 +70,66 @@ const capturePaypalOrder = async (req, res) => {
     request.requestBody({});
     const capture = await client.execute(request);
 
-    const purchase = capture.result.purchase_units[0];
-    const transactionId = purchase.payments.captures[0].id;
-    const serviceId = purchase.custom_id;
-    const description = purchase.description;
-    const amount = purchase.amount.value;
+    const transactionId =
+      capture.result.purchase_units[0]?.payments?.captures?.[0]?.id;
+    if (!transactionId) {
+      return res.status(400).json({ message: "Invalid PayPal transaction" });
+    }
 
-    const user = await User.findById(req.userId);
+    // Retrieve metadata from session or DB
+    const metadata = req.session?.[orderID];
+    if (!metadata) {
+      return res.status(400).json({ message: "Order metadata not found" });
+    }
+
+    const {
+      userId,
+      shippingInfo,
+      orderItems,
+      itemsPrice,
+      shippingPrice,
+      totalPrice,
+    } = metadata;
+
+    const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const existingOrder = await ServiceOrder.findOne({
+    // Prevent duplicate order
+    const existingOrder = await Order.findOne({
       "payment.transactionId": transactionId,
     });
+    if (existingOrder) {
+      return res.status(200).json({ message: "Order already exists" });
+    }
 
-    if (existingOrder)
-      return res.status(200).json({ message: "Order already created." });
+    const itemTypes = [...new Set(orderItems.map((item) => item.type))];
+    const order_type = itemTypes[0];
+    const isEbookOnly = order_type === "ebook";
 
-    const [serviceTitle, serviceName] = description.split(" - ");
-
-    const newOrder = new ServiceOrder({
-      service: {
-        id: serviceId,
-        name: serviceTitle,
-        type: serviceName,
-        price: amount,
-      },
+    const newOrder = new Order({
       user: {
         id: user._id,
-        name: user.username,
-        email: user.email,
-        phone: user.phone,
+        name: user.name,
+        email: user.email || "",
+        number: user.number || "",
+        country: user.country || "",
       },
+      shippingInfo: isEbookOnly ? {} : shippingInfo,
+      orderItems,
+      itemsPrice,
+      shippingPrice: isEbookOnly ? 0 : shippingPrice,
+      totalPrice,
       payment: {
         method: "paypal",
         transactionId,
         status: "paid",
       },
-      order_status: "pending",
-      cancel_request: false,
+      order_type,
+      order_status: isEbookOnly ? "completed" : "pending",
     });
 
     await newOrder.save();
-    res.status(200).json({ message: "✅ Order saved successfully." });
+    res.status(200).json({ message: "✅ PayPal order saved successfully" });
   } catch (err) {
     console.error("❌ PayPal capture error:", err);
     res.status(500).json({ message: "Internal server error" });
@@ -101,6 +137,6 @@ const capturePaypalOrder = async (req, res) => {
 };
 
 module.exports = {
+  createPaypalCheckoutSession,
   capturePaypalOrder,
-  createCheckoutSession,
 };

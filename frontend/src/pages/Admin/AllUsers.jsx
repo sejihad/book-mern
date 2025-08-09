@@ -84,7 +84,7 @@ const AllUsers = () => {
                         <td className="px-4 py-3 space-x-2">
                           <Link
                             to={`/admin/user/${user._id}`}
-                            className="inline-flex items-center px-2 py-1 text-xs font-medium text-green-600 hover:text-green-800"
+                            className="inline-flex items-center px-2 py-1 text-xs font-medium text-indigo-600 hover:text-indigo-800"
                           >
                             <FiEye className="mr-1" /> Details
                           </Link>

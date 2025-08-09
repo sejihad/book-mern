@@ -38,7 +38,7 @@ const createBook = catchAsyncErrors(async (req, res, next) => {
       `data:${file.mimetype};base64,${file.data.toString("base64")}`,
       {
         folder: "/book/books",
-        resource_type: "auto",
+        resource_type: "image",
       }
     );
     image = {
@@ -172,7 +172,7 @@ const updateBook = catchAsyncErrors(async (req, res, next) => {
         `data:${file.mimetype};base64,${file.data.toString("base64")}`,
         {
           folder: "/book/books",
-          resource_type: "auto",
+          resource_type: "image",
         }
       );
       req.body.image = {
@@ -210,7 +210,7 @@ const updateBook = catchAsyncErrors(async (req, res, next) => {
           `data:${file.mimetype};base64,${file.data.toString("base64")}`,
           {
             folder: "/book/additional_images",
-            resource_type: "auto",
+            resource_type: "image",
           }
         );
         images.push({
@@ -223,6 +223,13 @@ const updateBook = catchAsyncErrors(async (req, res, next) => {
       console.error("Additional images update error:", error);
       // Continue even if some images fail to update
     }
+  }
+  if (!req.files?.demoPdf) {
+    delete req.body.demoPdf;
+  }
+
+  if (!req.files?.fullPdf) {
+    delete req.body.fullPdf;
   }
 
   // Handle demoPdf update
@@ -245,9 +252,12 @@ const updateBook = catchAsyncErrors(async (req, res, next) => {
           resource_type: "raw",
         }
       );
-      req.body.demoPdf = {
-        public_id: demoResult.public_id,
-        url: demoResult.secure_url,
+      req.body = {
+        ...req.body,
+        demoPdf: {
+          public_id: demoResult.public_id,
+          url: demoResult.secure_url,
+        },
       };
     } catch (error) {
       console.error("Demo PDF update error:", error);
@@ -259,7 +269,7 @@ const updateBook = catchAsyncErrors(async (req, res, next) => {
   }
 
   // Handle fullPdf update (only for ebooks)
-  if (req.body.type === "ebook" && req.files?.fullPdf) {
+  if ((req.body.type || book.type) === "ebook" && req.files?.fullPdf) {
     try {
       // Delete old fullPdf if exists
       if (book.fullPdf?.public_id) {
@@ -278,9 +288,12 @@ const updateBook = catchAsyncErrors(async (req, res, next) => {
           resource_type: "raw",
         }
       );
-      req.body.fullPdf = {
-        public_id: fullResult.public_id,
-        url: fullResult.secure_url,
+      req.body = {
+        ...req.body,
+        fullPdf: {
+          public_id: fullResult.public_id,
+          url: fullResult.secure_url,
+        },
       };
     } catch (error) {
       console.error("Full PDF update error:", error);
@@ -394,6 +407,15 @@ const getBookDetails = catchAsyncErrors(async (req, res, next) => {
 
   res.status(200).json({ success: true, book });
 });
+const getAdminBookDetails = catchAsyncErrors(async (req, res, next) => {
+  let book = await Book.findById(req.params.id);
+
+  if (!book) {
+    return next(new ErrorHandler("Book not found", 404));
+  }
+
+  res.status(200).json({ success: true, book });
+});
 const getBookCart = catchAsyncErrors(async (req, res, next) => {
   let book = await Book.findById(req.params.id);
 
@@ -445,42 +467,29 @@ const createBookReview = catchAsyncErrors(async (req, res, next) => {
     success: true,
   });
 });
-
-// Get All Reviews of a product
-const getBookReviews = catchAsyncErrors(async (req, res, next) => {
-  const book = await Book.findById(req.query.id)
-    .populate("reviews.user", "name image")
-    .select("reviews");
+const getReviews = catchAsyncErrors(async (req, res, next) => {
+  const book = await Book.findById(req.params.id);
 
   if (!book) {
     return next(new ErrorHandler("Book not found", 404));
   }
 
-  // Transform reviews to include formatted date and ensure consistent structure
-  const transformedReviews = book.reviews.map((review) => ({
-    ...review.toObject(),
-    createdAt: review.createdAt, // Make sure your schema has timestamps
-    user: {
-      name: review.user?.name || "Anonymous",
-      image: review.user?.image || null,
-    },
-  }));
-
   res.status(200).json({
     success: true,
-    reviews: transformedReviews,
+    reviews: book.reviews,
   });
 });
+
 // Delete Review
 const deleteReview = catchAsyncErrors(async (req, res, next) => {
-  const book = await Book.findById(req.query.productId);
+  const book = await Book.findById(req.params.bookId);
 
-  if (!product) {
-    return next(new ErrorHandler("Product not found", 404));
+  if (!book) {
+    return next(new ErrorHandler("Book not found", 404));
   }
 
-  const reviews = product.reviews.filter(
-    (rev) => rev._id.toString() !== req.query.id.toString()
+  const reviews = book.reviews.filter(
+    (rev) => rev._id.toString() !== req.params.reviewId.toString()
   );
 
   let avg = 0;
@@ -499,8 +508,8 @@ const deleteReview = catchAsyncErrors(async (req, res, next) => {
 
   const numOfReviews = reviews.length;
 
-  await Product.findByIdAndUpdate(
-    req.query.productId,
+  await Book.findByIdAndUpdate(
+    req.params.bookId,
     {
       reviews,
       ratings,
@@ -524,8 +533,9 @@ module.exports = {
   deleteBook,
   getBookDetails,
   createBookReview,
-  getBookReviews,
   deleteReview,
   getAdminBooks,
   getBookCart,
+  getReviews,
+  getAdminBookDetails,
 };

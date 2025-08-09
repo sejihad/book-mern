@@ -9,9 +9,14 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { getPackageDetails } from "../../actions/packageAction";
+import { myOrders } from "../../actions/orderAction";
+import {
+  getPackageDetails,
+  newPacakgeReview,
+} from "../../actions/packageAction";
 import { addItemsPackageToCart } from "../../actions/packageCartAction";
 import Loader from "../../component/layout/Loader/Loader";
+import { NEW_REVIEW_RESET } from "../../constants/packageConstants";
 
 const StarRating = ({ rating, interactive = false, onChange }) => {
   const [hoverRating, setHoverRating] = useState(0);
@@ -63,23 +68,33 @@ const PackageDetails = () => {
   const { loading, package: pkg } = useSelector(
     (state) => state.packageDetails
   );
+  const [showPdf, setShowPdf] = useState(false);
+  const { orders } = useSelector((state) => state.myOrders);
   const { user } = useSelector((state) => state.user);
-
+  const { success: reviewSuccess } = useSelector(
+    (state) => state.newPackageReview
+  );
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [activeBookTab, setActiveBookTab] = useState(1);
   const [review, setReview] = useState({ rating: 0, comment: "" });
-
+  // const [showPdf, setShowPdf] = useState(false);
   useEffect(() => {
     dispatch(getPackageDetails(slug));
-  }, [dispatch, slug]);
+    dispatch(myOrders());
+    if (reviewSuccess) {
+      dispatch(getPackageDetails(slug));
+      toast.success("Review Created Success");
+      dispatch({ type: NEW_REVIEW_RESET });
+    }
+  }, [dispatch, slug, reviewSuccess]);
 
   const addToCartHandler = () => {
     dispatch(addItemsPackageToCart(pkg._id, quantity));
     navigate("/package/cart");
     toast.success("Package Added To Cart");
   };
-
+  const hasReviewed = pkg?.reviews?.some((r) => r.user === user?._id);
   const handleBuyNow = (item) => {
     if (!user) {
       navigate("/login");
@@ -98,14 +113,19 @@ const PackageDetails = () => {
 
   const incrementQuantity = () => setQuantity(quantity + 1);
   const decrementQuantity = () => quantity > 1 && setQuantity(quantity - 1);
+  const hasCompletedOrder = orders?.some(
+    (order) =>
+      order.order_status === "completed" &&
+      order.orderItems?.some((item) => item.id === pkg._id)
+  );
 
   const submitReview = () => {
     if (!user) {
       navigate("/login");
       return;
     }
-    // Add your review submission logic here
-    toast.success("Review submitted successfully");
+
+    dispatch(newPacakgeReview({ ...review, packageId: pkg._id }));
     setReview({ rating: 0, comment: "" });
   };
 
@@ -115,6 +135,55 @@ const PackageDetails = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
+      {/* {showPdf && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full h-[90vh] max-w-6xl relative flex flex-col">
+         
+            <button
+              onClick={() => setShowPdf(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-red-600 text-3xl font-bold z-50"
+            >
+              &times;
+            </button>
+
+            <div className="p-4 border-b">
+              <h2 className="text-2xl font-semibold text-center text-gray-800">
+                📘 Sample Book Preview
+              </h2>
+            </div>
+
+            <div className="flex-1 relative overflow-hidden">
+              
+              <div className="absolute inset-0">
+                <iframe
+                  src={`${book.demoPdf.url}#toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0`}
+                  title="Sample PDF"
+                  className="w-full h-full"
+                  frameBorder="0"
+                  allowFullScreen
+                ></iframe>
+
+                
+                <div
+                  className="absolute inset-0 z-10 pointer-events-none"
+                  onContextMenu={(e) => e.preventDefault()}
+                ></div>
+              </div>
+            </div>
+
+     
+            <div className="p-4 border-t flex justify-between items-center bg-gray-50">
+              <span className="text-sm text-gray-600">Read-only preview</span>
+              <button
+                onClick={() => setShowPdf(false)}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )} */}
       {/* Main Package Section - 3 Column Layout */}
       <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-8">
         {/* Left Column - Package Images */}
@@ -138,7 +207,7 @@ const PackageDetails = () => {
                     onClick={() => setSelectedImage(index)}
                     className={`flex-shrink-0 w-12 h-12 rounded border ${
                       selectedImage === index
-                        ? "border-green-500"
+                        ? "border-indigo-500"
                         : "border-gray-300"
                     }`}
                   >
@@ -184,7 +253,7 @@ const PackageDetails = () => {
                       onClick={() => setActiveBookTab(tab)}
                       className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
                         activeBookTab === tab
-                          ? "border-green-500 text-green-600"
+                          ? "border-indigo-500 text-indigo-600"
                           : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                       }`}
                     >
@@ -236,15 +305,70 @@ const PackageDetails = () => {
                       {pkg.books[`book${activeBookTab}`]?.isbn13 || "N/A"}
                     </div>
                   </div>
-                  {pkg.books[`book${activeBookTab}`]?.demoPdf && (
-                    <a
-                      href={pkg.books[`book${activeBookTab}`]?.demoPdf.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block text-blue-600 hover:text-blue-800 text-sm"
+                  {pkg.books[`book${activeBookTab}`]?.demoPdf?.url && (
+                    <button
+                      onClick={() => setShowPdf(true)}
+                      className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md transition"
                     >
-                      View Sample PDF
-                    </a>
+                      Read Sample PDF
+                    </button>
+                  )}
+
+                  {/* PDF Preview Modal */}
+                  {showPdf && (
+                    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+                      <div className="bg-white rounded-xl shadow-2xl w-full h-[90vh] max-w-6xl relative flex flex-col">
+                        {/* Close button */}
+                        <button
+                          onClick={() => setShowPdf(false)}
+                          className="absolute top-3 right-3 text-gray-500 hover:text-red-600 text-3xl font-bold z-50"
+                        >
+                          &times;
+                        </button>
+
+                        {/* Modal Header */}
+                        <div className="p-4 border-b">
+                          <h2 className="text-2xl font-semibold text-center text-gray-800">
+                            📘 Sample Book Preview
+                          </h2>
+                        </div>
+
+                        {/* PDF Container */}
+                        <div className="flex-1 relative overflow-hidden">
+                          {/* PDF Viewer with restricted interactions */}
+                          <div className="absolute inset-0">
+                            <iframe
+                              src={`${
+                                pkg.books[`book${activeBookTab}`].demoPdf.url
+                              }#toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0`}
+                              title="Sample PDF"
+                              className="w-full h-full"
+                              frameBorder="0"
+                              allowFullScreen
+                            ></iframe>
+
+                            {/* Block right-click and other interactions */}
+                            <div
+                              className="absolute inset-0 z-10 pointer-events-none"
+                              onContextMenu={(e) => e.preventDefault()}
+                            ></div>
+                          </div>
+                        </div>
+
+                        {/* Custom Controls */}
+                        <div className="p-4 border-t flex justify-between items-center bg-gray-50">
+                          <span className="text-sm text-gray-600">
+                            Read-only preview
+                          </span>
+                          <button
+                            onClick={() => setShowPdf(false)}
+                            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                          >
+                            Close Preview
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
@@ -256,7 +380,7 @@ const PackageDetails = () => {
         <div className="md:col-span-1">
           <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 sticky top-4">
             <div className="flex items-center mb-4">
-              <span className="text-2xl font-bold text-green-600">
+              <span className="text-2xl font-bold text-indigo-600">
                 ${pkg.discountPrice}
               </span>
               {pkg.oldPrice > pkg.discountPrice && (
@@ -307,7 +431,7 @@ const PackageDetails = () => {
             <div className="space-y-3">
               <button
                 onClick={addToCartHandler}
-                className="w-full flex items-center justify-center py-2 px-4 rounded-md font-medium text-white bg-green-600 hover:bg-green-700 transition"
+                className="w-full flex items-center justify-center py-2 px-4 rounded-md font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition"
               >
                 <FaShoppingCart className="mr-2" />
                 Add to Cart
@@ -323,7 +447,7 @@ const PackageDetails = () => {
                     type: "package",
                   })
                 }
-                className="w-full py-2 px-4 rounded-md font-medium text-white bg-green-600 hover:bg-green-700 transition"
+                className="w-full py-2 px-4 rounded-md font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition"
               >
                 Buy Now
               </button>
@@ -356,7 +480,7 @@ const PackageDetails = () => {
         </h2>
 
         {/* Review Form */}
-        {user && (
+        {user && hasCompletedOrder && !hasReviewed && (
           <div className="mb-8">
             <h3 className="text-lg font-semibold mb-2">Write a Review</h3>
             <div className="space-y-4">
@@ -383,7 +507,7 @@ const PackageDetails = () => {
               <button
                 onClick={submitReview}
                 disabled={review.rating === 0 || !review.comment.trim()}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md disabled:bg-gray-400"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md disabled:bg-gray-400"
               >
                 Submit Review
               </button>

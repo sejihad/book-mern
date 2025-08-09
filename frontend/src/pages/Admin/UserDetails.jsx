@@ -51,7 +51,9 @@ const UserDetails = () => {
                   <span className="font-medium">Role:</span>{" "}
                   <span
                     className={
-                      user.role === "admin" ? "text-green-600" : "text-blue-600"
+                      user.role === "admin"
+                        ? "text-indigo-600"
+                        : "text-blue-600"
                     }
                   >
                     {user.role}

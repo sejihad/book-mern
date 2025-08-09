@@ -89,6 +89,31 @@ export const getPackageDetails = (slug) => async (dispatch) => {
     });
   }
 };
+export const getAdminPackageDetails = (id) => async (dispatch) => {
+  try {
+    dispatch({ type: PACKAGE_DETAILS_REQUEST });
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    const { data } = await axios.get(
+      `${API_URL}/api/v1/admin/package/${id}`,
+      config
+    );
+
+    dispatch({
+      type: PACKAGE_DETAILS_SUCCESS,
+      payload: data.package,
+    });
+  } catch (error) {
+    dispatch({
+      type: PACKAGE_DETAILS_FAIL,
+      payload: error.response?.data?.message || "Something went wrong",
+    });
+  }
+};
 
 // Create New Package
 export const createPackage = (packageData) => async (dispatch) => {
@@ -181,7 +206,7 @@ export const deletePackage = (id) => async (dispatch) => {
 };
 
 // Create Package Review
-export const newReview = (reviewData) => async (dispatch) => {
+export const newPacakgeReview = (reviewData) => async (dispatch) => {
   try {
     dispatch({ type: NEW_REVIEW_REQUEST });
     const token = localStorage.getItem("token");

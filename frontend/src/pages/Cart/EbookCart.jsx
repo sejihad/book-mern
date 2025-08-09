@@ -8,6 +8,7 @@ const EbookCart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { ebookCartItems } = useSelector((state) => state.ebookCart);
+  const { user } = useSelector((state) => state.user);
 
   const removeFromCart = (id) => {
     dispatch(removeItemsEbookFromCart(id));
@@ -45,7 +46,7 @@ const EbookCart = () => {
       {ebookCartItems.length === 0 ? (
         <div className="text-center text-gray-600">
           Your eBook cart is empty. <br />
-          <Link to="/ebook" className="text-green-600 hover:underline">
+          <Link to="/ebook" className="text-indigo-600 hover:underline">
             Browse eBooks
           </Link>
         </div>
@@ -66,13 +67,13 @@ const EbookCart = () => {
                 </div>
                 <div className="col-span-2">
                   <h3 className="text-lg font-semibold">{item.name}</h3>
-                  <p className="text-green-600 font-medium">
+                  <p className="text-indigo-600 font-medium">
                     ${item.discountPrice || item.price}
                   </p>
                 </div>
                 <div className="col-span-1 text-right">
                   <button
-                    onClick={() => removeFromCart(item.book)}
+                    onClick={() => removeFromCart(item.id)}
                     className="text-red-600 hover:text-red-800"
                     title="Remove from cart"
                   >
@@ -86,7 +87,7 @@ const EbookCart = () => {
           {/* Total Price */}
           <div className="flex justify-end mt-4 text-lg font-semibold">
             Total:{" "}
-            <span className="ml-2 text-green-700">
+            <span className="ml-2 text-indigo-700">
               ${totalPrice.toFixed(2)}
             </span>
           </div>
@@ -94,7 +95,7 @@ const EbookCart = () => {
           <div className="flex justify-end mt-6">
             <button
               onClick={goToCheckout}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded shadow"
             >
               Proceed to Checkout
             </button>

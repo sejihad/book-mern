@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 
 import {
   clearErrors,
-  getBlogDetails,
+  getAdminBlogDetails,
   updateBlog,
 } from "../../actions/blogAction";
 
@@ -30,7 +30,7 @@ const UpdateBlog = () => {
 
   useEffect(() => {
     if (!blog || blog._id !== blogId) {
-      dispatch(getBlogDetails(blogId));
+      dispatch(getAdminBlogDetails(blogId));
     } else {
       setTitle(blog.title);
       setDesc(blog.desc);
@@ -90,7 +90,7 @@ const UpdateBlog = () => {
         {/* Main Content */}
         <div className="flex-1 p-4 md:p-8">
           <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="bg-gradient-to-r from-yellow-500 to-orange-500 p-4 md:p-6">
+            <div className="bg-gradient-to-r from-indigo-500 to-indigo-500 p-4 md:p-6">
               <h1 className="text-xl md:text-2xl font-bold text-white text-center">
                 Update Blog Post
               </h1>
@@ -112,7 +112,7 @@ const UpdateBlog = () => {
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 py-2 md:px-4 md:py-3 text-sm md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition duration-300"
+                  className="w-full px-3 py-2 md:px-4 md:py-3 text-sm md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-300"
                 />
               </div>
 
@@ -127,7 +127,7 @@ const UpdateBlog = () => {
                   value={desc}
                   onChange={(e) => setDesc(e.target.value)}
                   rows={6}
-                  className="w-full px-3 py-2 md:px-4 md:py-3 text-sm md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition duration-300"
+                  className="w-full px-3 py-2 md:px-4 md:py-3 text-sm md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-300"
                 ></textarea>
               </div>
 
@@ -195,7 +195,7 @@ const UpdateBlog = () => {
                 className={`w-full py-2 md:py-3 px-4 rounded-lg text-sm md:text-base font-medium text-white transition duration-300 cursor-pointer ${
                   loading
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-yellow-500 hover:bg-yellow-600 shadow-md hover:shadow-lg"
+                    : "bg-indigo-500 hover:bg-indigo-600 shadow-md hover:shadow-lg"
                 } flex items-center justify-center`}
               >
                 {loading ? (

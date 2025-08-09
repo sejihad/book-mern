@@ -22,7 +22,7 @@ const Profile = () => {
     <>
       <MetaData title={`${user?.name || "User"}'s Profile`} />
 
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 py-12 px-4">
         <div className="max-w-5xl mx-auto">
           {/* Profile Header */}
           <div className="text-center mb-8">
@@ -34,7 +34,7 @@ const Profile = () => {
 
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
             {/* Profile Banner */}
-            <div className="h-32 bg-gradient-to-r from-green-500 to-blue-600 relative">
+            <div className="h-32 bg-gradient-to-r from-indigo-500 to-blue-600 relative">
               <div className="absolute -bottom-16 left-8">
                 <div className="relative group">
                   <img
@@ -50,7 +50,7 @@ const Profile = () => {
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-green-600"
+                      className="h-5 w-5 text-indigo-600"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -65,14 +65,14 @@ const Profile = () => {
             <div className="pt-20 px-8 pb-8 grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Left Column - Quick Actions */}
               <div className="md:col-span-1 space-y-4">
-                <div className="bg-green-50 rounded-xl p-6">
-                  <h3 className="font-medium text-green-800 mb-4">
+                <div className="bg-indigo-50 rounded-xl p-6">
+                  <h3 className="font-medium text-indigo-800 mb-4">
                     Quick Actions
                   </h3>
                   <div className="space-y-3">
                     <Link
                       to="/profile/update"
-                      className="flex items-center text-green-600 hover:text-green-800"
+                      className="flex items-center text-indigo-600 hover:text-indigo-800"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -87,7 +87,7 @@ const Profile = () => {
                     {user?.provider === "local" && (
                       <Link
                         to="/password/update"
-                        className="flex items-center text-green-600 hover:text-green-800"
+                        className="flex items-center text-indigo-600 hover:text-indigo-800"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -112,7 +112,7 @@ const Profile = () => {
                     Account Status
                   </h3>
                   <div className="flex items-center">
-                    <div className="h-3 w-3 rounded-full bg-green-500 mr-2"></div>
+                    <div className="h-3 w-3 rounded-full bg-indigo-500 mr-2"></div>
                     <span className="text-sm text-gray-700">Active</span>
                   </div>
                   <p className="text-xs text-gray-500 mt-2">

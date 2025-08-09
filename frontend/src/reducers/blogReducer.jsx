@@ -163,3 +163,30 @@ export const blogDetailsReducer = (state = { blog: {} }, action) => {
       return state;
   }
 };
+export const blogAdminDetailsReducer = (state = { blog: {} }, action) => {
+  switch (action.type) {
+    case BLOG_DETAILS_REQUEST:
+      return {
+        loading: true,
+        ...state,
+      };
+    case BLOG_DETAILS_SUCCESS:
+      return {
+        loading: false,
+        blog: action.payload,
+      };
+    case BLOG_DETAILS_FAIL:
+      return {
+        loading: false,
+        error: action.payload,
+      };
+
+    case CLEAR_ERRORS:
+      return {
+        ...state,
+        error: null,
+      };
+    default:
+      return state;
+  }
+};

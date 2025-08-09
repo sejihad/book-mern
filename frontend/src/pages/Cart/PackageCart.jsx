@@ -11,6 +11,7 @@ const PackageCart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { packageCartItems } = useSelector((state) => state.packageCart);
+  const { user } = useSelector((state) => state.user);
 
   const removeFromCart = (id) => {
     dispatch(removeItemsPackageFromCart(id));
@@ -81,7 +82,7 @@ const PackageCart = () => {
                   </div>
                   <div className="col-span-2">
                     <h3 className="text-lg font-semibold">{item.name}</h3>
-                    <p className="text-green-600 font-medium">
+                    <p className="text-indigo-600 font-medium">
                       Price: ${price.toFixed(2)}
                     </p>
                   </div>
@@ -107,7 +108,7 @@ const PackageCart = () => {
                   </div>
                   <div className="col-span-1 text-right">
                     <button
-                      onClick={() => removeFromCart(item.package)}
+                      onClick={() => removeFromCart(item.id)}
                       className="text-red-600 hover:text-red-800"
                       title="Remove from cart"
                     >
@@ -137,7 +138,7 @@ const PackageCart = () => {
               </div>
               <button
                 onClick={goToCheckout}
-                className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
+                className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded shadow"
               >
                 Proceed to Checkout
               </button>

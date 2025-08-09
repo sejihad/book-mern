@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
+import { paypalOrderCreate } from "../../actions/paypalAction";
 import { getShips } from "../../actions/shipAction";
 import { stripeOrderCreate } from "../../actions/stripeAction";
 import MetaData from "../../component/layout/MetaData";
@@ -15,7 +16,7 @@ const Checkout = () => {
 
   // Safely get location state with defaults
   const { cartItems = [], type = "" } = location.state || {};
-  console.log(cartItems, type);
+
   const isEbook = type === "ebook";
 
   const { user, isAuthenticated } = useSelector((state) => state.user);
@@ -154,7 +155,8 @@ const Checkout = () => {
     dispatch(stripeOrderCreate(orderData));
   };
 
-  const handlePaypalPayment = async () => {
+  const handlePaypalPayment = async (e) => {
+    e.preventDefault();
     // Validate authentication
     if (!isAuthenticated) {
       toast.info("Please login to proceed with payment");
@@ -167,15 +169,15 @@ const Checkout = () => {
       toast.error("Please fill all shipping fields correctly");
       return;
     }
-
     const orderData = {
       shippingInfo: isEbook ? {} : shippingInfo,
       orderItems: cartItems.map((item) => ({
-        [type]: item[type], // Dynamic key based on product type
+        id: item.id,
         name: item.name,
-        price: item.discountPrice,
+        price: item.price,
         image: item.image,
         quantity: item.quantity,
+        type: item.type,
       })),
       itemsPrice: totalPrice,
       shippingPrice: isEbook ? 0 : shippingCharge,
@@ -183,8 +185,8 @@ const Checkout = () => {
       paymentMethod: "paypal",
     };
 
-    // Call PayPal API
-    const response = await paypalOrderCreate(orderData);
+    // Call Stripe API
+    dispatch(paypalOrderCreate(orderData));
   };
 
   if (isLoading) {
@@ -310,29 +312,36 @@ const Checkout = () => {
 
           {/* Payment buttons - shown for both ebook and physical products */}
           <div className={`${isEbook ? "md:col-span-3" : ""}`}>
-            <div className="flex flex-col space-y-3 mt-6">
-              <button
-                onClick={(e) => handleStripePayment(e)}
-                disabled={!isFormComplete}
-                className={`w-full py-2 px-4 rounded ${
-                  isFormComplete
-                    ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                    : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                }`}
-              >
-                💳 Pay with Stripe
-              </button>
-              <button
-                onClick={handlePaypalPayment}
-                disabled={!isFormComplete}
-                className={`w-full py-2 px-4 rounded ${
-                  isFormComplete
-                    ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-                    : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                }`}
-              >
-                🅿️ Pay with PayPal
-              </button>
+            <div className="mt-6 p-6 bg-white shadow-md rounded-lg border border-gray-200">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800 text-center">
+                Choose Payment Method
+              </h2>
+
+              <div className="flex flex-col space-y-4">
+                <button
+                  onClick={(e) => handleStripePayment(e)}
+                  disabled={!isFormComplete}
+                  className={`w-full py-3 px-4 rounded-md text-lg font-medium transition-all duration-300 ${
+                    isFormComplete
+                      ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+                      : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                  }`}
+                >
+                  💳 Pay with Stripe
+                </button>
+
+                <button
+                  onClick={handlePaypalPayment}
+                  disabled={!isFormComplete}
+                  className={`w-full py-3 px-4 rounded-md text-lg font-medium transition-all duration-300 ${
+                    isFormComplete
+                      ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                      : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                  }`}
+                >
+                  🅿️ Pay with PayPal
+                </button>
+              </div>
             </div>
           </div>
 

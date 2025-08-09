@@ -5,13 +5,13 @@ import "./hero.css"; // animate-float CSS class
 
 const Hero = () => {
   return (
-    <section className="bg-gradient-to-b from-white to-green-50 py-16">
+    <section className="bg-gradient-to-b from-white to-indigo-50 py-16">
       <div className="container mx-auto px-4 flex flex-col-reverse md:flex-row items-center gap-10">
         {/* Left Content */}
         <div className="text-center md:text-left max-w-xl">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-gray-800 mb-4">
             BOOKS WILL <br />
-            <span className="text-green-600">EXPAND YOUR KNOWLEDGE</span>
+            <span className="text-indigo-600">EXPAND YOUR KNOWLEDGE</span>
           </h1>
           <p className="text-gray-600 text-base sm:text-lg leading-relaxed">
             Discover the power of books that grow your mind. Dive into endless
@@ -20,7 +20,7 @@ const Hero = () => {
 
           <Link
             to="/shop"
-            className="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-full shadow-lg transition-all duration-300"
+            className="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-full shadow-lg transition-all duration-300"
           >
             <FiShoppingCart className="text-lg" />
             Buy Now

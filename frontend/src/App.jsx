@@ -32,6 +32,16 @@ import Home from "./pages/Home/Home";
 import NotFound from "./pages/NotFound/NotFound";
 import MyOrders from "./pages/Orders/MyOrders";
 
+import { useEffect } from "react";
+import enableContentProtection from "./component/layout/SecurityFeature/enableContentProtection";
+import AdminOrderDetails from "./pages/Admin/AdminOrderDetails";
+import AllReviews from "./pages/Admin/AllReviews";
+import NewBook from "./pages/Admin/NewBook";
+import NewPackage from "./pages/Admin/NewPackage";
+import Reviews from "./pages/Admin/Reviews";
+import UpdateBook from "./pages/Admin/UpdateBook";
+import UpdatePackage from "./pages/Admin/UpdatePackage";
+import EbookLibrary from "./pages/BookDetails/EbookLibrary";
 import OrderDetails from "./pages/Orders/OrderDetails";
 import PackageSection from "./pages/Package/Package";
 import PackageDetails from "./pages/Package/PackageDetails";
@@ -44,6 +54,9 @@ import Setting from "./pages/User/Setting";
 import UpdatePassword from "./pages/User/UpdatePassword";
 import UpdateProfile from "./pages/User/UpdateProfile";
 const App = () => {
+  useEffect(() => {
+    enableContentProtection();
+  }, []);
   return (
     <BrowserRouter>
       <Header />
@@ -146,6 +159,14 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/ebook-library"
+          element={
+            <ProtectedRoute>
+              <EbookLibrary />
+            </ProtectedRoute>
+          }
+        />
 
         {/* admin route */}
         <Route
@@ -213,10 +234,42 @@ const App = () => {
           }
         />
         <Route
+          path="/admin/book/new"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <NewBook />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/book/:id"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <UpdateBook />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/admin/books"
           element={
             <ProtectedRoute isAdmin={true}>
               <AllBooks />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/package/new"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <NewPackage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/package/:id"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <UpdatePackage />
             </ProtectedRoute>
           }
         />
@@ -233,6 +286,30 @@ const App = () => {
           element={
             <ProtectedRoute isAdmin={true}>
               <AllOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/order/:id"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <AdminOrderDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/reviews/:type/:id"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <Reviews />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/reviews"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <AllReviews />
             </ProtectedRoute>
           }
         />

@@ -3,8 +3,8 @@ import { applyMiddleware, combineReducers, createStore } from "redux";
 import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // LocalStorage use korar jonno
 import { thunk } from "redux-thunk"; // ✅ Named import
-import { newReview } from "./actions/packageAction";
 import {
+  blogAdminDetailsReducer,
   blogDetailsReducer,
   blogReducer,
   blogsReducer,
@@ -12,11 +12,14 @@ import {
 } from "./reducers/blogReducer";
 import { bookCartReducer } from "./reducers/bookCartReducer";
 import {
+  bookAdminDetailsReducer,
   bookDetailsReducer,
   bookReducer,
+  BookReviewsReducer,
   booksReducer,
   newBookReducer,
   newReviewReducer,
+  reviewReducer,
 } from "./reducers/bookReducer";
 import {
   categoriesReducer,
@@ -34,6 +37,8 @@ import {
 import { packageCartReducer } from "./reducers/packageCartReducer";
 import {
   newPackageReducer,
+  newPackageReviewReducer,
+  packageAdminDetailsReducer,
   packageDetailsReducer,
   packageReducer,
   packagesReducer,
@@ -70,6 +75,7 @@ const rootReducer = combineReducers({
   blogs: blogsReducer,
   blog: blogReducer,
   blogDetails: blogDetailsReducer,
+  blogAdminDetails: blogAdminDetailsReducer,
   newCategory: newCategoryReducer,
   categories: categoriesReducer,
   category: categoryReducer,
@@ -82,18 +88,24 @@ const rootReducer = combineReducers({
   newBook: newBookReducer,
   book: bookReducer,
   bookDetails: bookDetailsReducer,
+  bookAdminDetails: bookAdminDetailsReducer,
   newReview: newReviewReducer,
+
   packages: packagesReducer,
   newPackage: newPackageReducer,
   package: packageReducer,
   packageDetails: packageDetailsReducer,
-  newPackageReview: newReview,
+  packageAdminDetails: packageAdminDetailsReducer,
+  newPackageReview: newPackageReviewReducer,
+  bookReview: reviewReducer,
+  bookReviews: BookReviewsReducer,
 
   //order
   myOrders: myOrdersReducer,
   allOrders: allOrdersReducer,
   order: orderReducer,
   orderDetails: orderDetailsReducer,
+
   // cart
   ebookCart: ebookCartReducer,
   bookCart: bookCartReducer,

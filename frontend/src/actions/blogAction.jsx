@@ -79,6 +79,31 @@ export const getBlogDetails = (slug) => async (dispatch) => {
     });
   }
 };
+export const getAdminBlogDetails = (id) => async (dispatch) => {
+  try {
+    dispatch({ type: BLOG_DETAILS_REQUEST });
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    const { data } = await axios.get(
+      `${API_URL}/api/v1/admin/blog/${id}`,
+      config
+    );
+
+    dispatch({
+      type: BLOG_DETAILS_SUCCESS,
+      payload: data.blog,
+    });
+  } catch (error) {
+    dispatch({
+      type: BLOG_DETAILS_FAIL,
+      payload: error.response?.data?.message || "Something went wrong",
+    });
+  }
+};
 // Create BLOG
 export const createBlog = (blogData) => async (dispatch) => {
   try {

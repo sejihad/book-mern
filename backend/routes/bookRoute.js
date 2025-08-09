@@ -6,10 +6,12 @@ const {
   updateBook,
   deleteBook,
   createBookReview,
-  getBookReviews,
+
   deleteReview,
   getAdminBooks,
   getBookCart,
+  getAdminBookDetails,
+  getReviews,
 } = require("../controllers/bookController");
 
 const { isAuthenticator, authorizeRoles } = require("../middleware/auth");
@@ -39,15 +41,16 @@ router.post(
 
 router
   .route("/admin/book/:id")
+  .get(isAuthenticator, authorizeRoles("admin"), getAdminBookDetails)
   .put(isAuthenticator, authorizeRoles("admin"), updateBook)
   .delete(isAuthenticator, authorizeRoles("admin"), deleteBook);
 
 // ⭐️ Review Routes
 router.put("/review", isAuthenticator, createBookReview);
 
+router.route("/book/reviews/:id").get(isAuthenticator, getReviews);
 router
-  .route("/reviews")
-  .get(getBookReviews)
+  .route("/book/review/:bookId/:reviewId")
   .delete(isAuthenticator, deleteReview);
 
 module.exports = router;

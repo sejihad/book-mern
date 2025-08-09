@@ -136,7 +136,7 @@ const AllCategories = () => {
                 resetForm();
                 setIsFormOpen(!isFormOpen);
               }}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors cursor-pointer"
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors cursor-pointer"
             >
               {isFormOpen ? (
                 <>
@@ -167,7 +167,7 @@ const AllCategories = () => {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
                 </div>
 
@@ -176,7 +176,7 @@ const AllCategories = () => {
                     Category Image (Optional)
                   </label>
                   <div className="flex items-center gap-4">
-                    <label className="flex flex-col items-center justify-center w-full max-w-xs p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-green-500 transition-colors">
+                    <label className="flex flex-col items-center justify-center w-full max-w-xs p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-indigo-500 transition-colors">
                       <FiUpload className="text-gray-400 mb-2" size={24} />
                       <span className="text-sm text-gray-500 text-center">
                         {image ? "Change Image" : "Upload Image"}
@@ -213,7 +213,7 @@ const AllCategories = () => {
                   className={`w-full py-3 px-4 cursor-pointer rounded-lg text-white font-semibold flex items-center justify-center gap-2 ${
                     loading
                       ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-green-600 hover:bg-green-700"
+                      : "bg-indigo-600 hover:bg-indigo-700"
                   }`}
                 >
                   {loading ? (
@@ -237,7 +237,7 @@ const AllCategories = () => {
               <h2 className="text-xl font-semibold text-gray-800">
                 All Categories
               </h2>
-              <span className="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
+              <span className="bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1 rounded-full">
                 {categories?.length || 0} categories
               </span>
             </div>
@@ -273,7 +273,7 @@ const AllCategories = () => {
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => handleEdit(cat)}
-                          className="p-2 text-green-600 hover:bg-green-50 cursor-pointer rounded-full transition-colors"
+                          className="p-2 text-indigo-600 hover:bg-indigo-50 cursor-pointer rounded-full transition-colors"
                           title="Edit"
                         >
                           <FiEdit2 size={18} />

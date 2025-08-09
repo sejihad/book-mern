@@ -76,7 +76,7 @@ const NewBlog = () => {
         <div className="flex-1 p-4 md:p-8">
           <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
             {/* Form Header */}
-            <div className="bg-gradient-to-r from-green-600 to-indigo-600 p-4 md:p-6">
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-600 p-4 md:p-6">
               <h1 className="text-xl md:text-2xl font-bold text-white text-center">
                 Create New Blog Post
               </h1>
@@ -98,7 +98,7 @@ const NewBlog = () => {
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 py-2 md:px-4 md:py-3 text-sm md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-300"
+                  className="w-full px-3 py-2 md:px-4 md:py-3 text-sm md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-300"
                 />
               </div>
 
@@ -113,7 +113,7 @@ const NewBlog = () => {
                   value={desc}
                   onChange={(e) => setDesc(e.target.value)}
                   rows={6}
-                  className="w-full px-3 py-2 md:px-4 md:py-3 text-sm md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-300 "
+                  className="w-full px-3 py-2 md:px-4 md:py-3 text-sm md:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 "
                 ></textarea>
               </div>
 
@@ -182,7 +182,7 @@ const NewBlog = () => {
                 className={`w-full py-2 md:py-3 px-4 rounded-lg text-sm md:text-base font-medium text-white transition duration-300 cursor-pointer ${
                   loading
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg"
+                    : "bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-lg"
                 } flex items-center justify-center`}
               >
                 {loading ? (

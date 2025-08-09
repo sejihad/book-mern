@@ -3,6 +3,7 @@ const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 
 const cloudinary = require("cloudinary");
+const { default: slugify } = require("slugify");
 
 const getAllCategories = catchAsyncErrors(async (req, res, next) => {
   const categories = await Category.find();
@@ -70,51 +71,54 @@ const getCategoryDetails = catchAsyncErrors(async (req, res, next) => {
   res.status(200).json({ success: true, category });
 });
 const updateCategory = catchAsyncErrors(async (req, res, next) => {
-  let category = await Category.findById(req.params.id);
+  const category = await Category.findById(req.params.id);
 
   if (!category) {
     return next(new ErrorHandler("Category not found", 404));
   }
 
-  if (req.files && req.files.image) {
-    if (category.image && category.image.public_id) {
+  // Handle image update if new image is provided
+  if (req.files?.image) {
+    // Delete old image if exists
+    if (category.image?.public_id) {
       try {
         await cloudinary.uploader.destroy(category.image.public_id);
       } catch (error) {
         console.error("Cloudinary Deletion Error:", error);
+        // Continue with update even if deletion fails
       }
     }
 
+    // Upload new image
     try {
       const result = await cloudinary.uploader.upload(
         `data:${
           req.files.image.mimetype
         };base64,${req.files.image.data.toString("base64")}`,
         {
-          folder: "/book/categories",
+          folder: "book/categories", // Removed leading slash for consistency
         }
       );
 
-      req.body.image = {
+      category.image = {
+        // Directly assign to category instead of req.body
         public_id: result.public_id,
         url: result.secure_url,
       };
     } catch (error) {
       console.error("Cloudinary Upload Error:", error);
-      return res
-        .status(500)
-        .json({ success: false, message: "Image upload failed" });
+      return next(new ErrorHandler("Image upload failed", 500));
     }
   }
 
-  const updatedData = {};
-  if (req.body.name) updatedData.name = req.body.name;
-  if (req.body.image) updatedData.image = req.body.image;
-  category = await Category.findByIdAndUpdate(req.params.id, updatedData, {
-    new: true,
-    runValidators: true,
-    useFindAndModify: false,
-  });
+  // Update name and slug if name is provided
+  if (req.body.name) {
+    category.name = req.body.name;
+    category.slug = slugify(req.body.name, { lower: true, strict: true });
+  }
+
+  // Save the updated category
+  await category.save();
 
   res.status(200).json({
     success: true,
