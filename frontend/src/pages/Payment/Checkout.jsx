@@ -161,7 +161,12 @@ const Checkout = () => {
 
   const handlePaypalPayment = async (e) => {
     e.preventDefault();
-    if (user.country === "" || user.number === "") {
+    if (
+      user.country === "" ||
+      user.number === "" ||
+      !user.county ||
+      user.number
+    ) {
       navigate("/profile/update");
       toast.info("Complete Your Profile");
     }
