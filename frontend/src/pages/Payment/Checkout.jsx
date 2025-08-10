@@ -122,6 +122,10 @@ const Checkout = () => {
 
   const handleStripePayment = async (e) => {
     e.preventDefault();
+    if (user.country === "" || user.number === "") {
+      navigate("/profile/update");
+      toast.info("Complete Your Profile");
+    }
     // Validate authentication
     if (!isAuthenticated) {
       toast.info("Please login to proceed with payment");
@@ -157,6 +161,10 @@ const Checkout = () => {
 
   const handlePaypalPayment = async (e) => {
     e.preventDefault();
+    if (user.country === "" || user.number === "") {
+      navigate("/profile/update");
+      toast.info("Complete Your Profile");
+    }
     // Validate authentication
     if (!isAuthenticated) {
       toast.info("Please login to proceed with payment");
