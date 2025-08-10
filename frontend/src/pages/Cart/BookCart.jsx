@@ -29,17 +29,19 @@ const BookCart = () => {
   const goToCheckout = () => {
     if (!user) {
       navigate("/login");
-    } else if (user.country === "" || user.number === "") {
+      return;
+    }
+    if (!user.country || !user.number) {
       navigate("/profile/update");
       toast.info("Complete Your Profile");
-    } else {
-      navigate("/checkout", {
-        state: {
-          cartItems: bookCartItems,
-          type: "book",
-        },
-      });
+      return;
     }
+    navigate("/checkout", {
+      state: {
+        cartItems: bookCartItems,
+        type: "book",
+      },
+    });
   };
 
   // ✅ Calculate total price
