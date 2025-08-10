@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { getCategory } from "../../actions/categoryAction";
 import { logout } from "../../actions/userAction";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/logo.svg";
 
 const Header = () => {
   const [bookCartCount, setBookCartCount] = useState(0);
@@ -117,8 +117,26 @@ const Header = () => {
     <nav className="w-full shadow-md bg-white sticky top-0 z-50">
       <div className="max-w-[1050px] mx-auto px-4 py-4 flex justify-between items-center">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="Logo" className="h-10 w-auto" />
+        <Link
+          to="/"
+          className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap"
+        >
+          {/* Logo */}
+          <img
+            src={logo}
+            alt="Mind Storm Book Shop Logo"
+            className="h-6 sm:h-8 md:h-10 w-auto object-contain"
+          />
+
+          {/* Brand Name */}
+          <div className="flex flex-col sm:flex-row sm:items-center leading-tight">
+            <p className="font-bold text-sm sm:text-lg md:text-xl text-indigo-600">
+              Mind Storm Books
+            </p>
+            <span className="font-bold text-sm sm:text-lg md:text-xl text-gray-700 sm:ml-1">
+              Shop
+            </span>
+          </div>
         </Link>
 
         {/* Desktop Menu */}

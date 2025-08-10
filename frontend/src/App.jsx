@@ -1,19 +1,27 @@
+import { useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Footer from "./component/layout/Footer";
 import Header from "./component/layout/Header";
 import ProtectedRoute from "./component/Route/ProtectedRoute";
+import AdminOrderDetails from "./pages/Admin/AdminOrderDetails";
 import AllBlogs from "./pages/Admin/AllBlogs";
 import AllBooks from "./pages/Admin/AllBooks";
 import AllCategories from "./pages/Admin/AllCategories";
 import AllOrders from "./pages/Admin/AllOrders";
 import AllPackages from "./pages/Admin/AllPackages";
+import AllReviews from "./pages/Admin/AllReviews";
 import AllShips from "./pages/Admin/AllShips";
 import AllUsers from "./pages/Admin/AllUsers";
 import Dashboard from "./pages/Admin/Dashboard";
 import NewBlog from "./pages/Admin/NewBlog";
+import NewBook from "./pages/Admin/NewBook";
+import NewPackage from "./pages/Admin/NewPackage";
+import Reviews from "./pages/Admin/Reviews";
 import UpdateBlog from "./pages/Admin/UpdateBlog";
+import UpdateBook from "./pages/Admin/UpdateBook";
+import UpdatePackage from "./pages/Admin/UpdatePackage";
 import UserDetails from "./pages/Admin/UserDetails";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
 import GoogleSuccess from "./pages/Auth/GoogleSuccess";
@@ -24,6 +32,7 @@ import Blogs from "./pages/Blogs/Blogs";
 import BookPage from "./pages/Book/BookPage";
 import CatBook from "./pages/Book/CatBook";
 import BookDetails from "./pages/BookDetails/BookDetails";
+import EbookLibrary from "./pages/BookDetails/EbookLibrary";
 import BookCart from "./pages/Cart/BookCart";
 import EbookCart from "./pages/Cart/EbookCart";
 import PackageCart from "./pages/Cart/PackageCart";
@@ -31,31 +40,22 @@ import EBookPage from "./pages/Ebook/EBookPage";
 import Home from "./pages/Home/Home";
 import NotFound from "./pages/NotFound/NotFound";
 import MyOrders from "./pages/Orders/MyOrders";
-
-import { useEffect } from "react";
-import enableContentProtection from "./component/layout/SecurityFeature/enableContentProtection";
-import AdminOrderDetails from "./pages/Admin/AdminOrderDetails";
-import AllReviews from "./pages/Admin/AllReviews";
-import NewBook from "./pages/Admin/NewBook";
-import NewPackage from "./pages/Admin/NewPackage";
-import Reviews from "./pages/Admin/Reviews";
-import UpdateBook from "./pages/Admin/UpdateBook";
-import UpdatePackage from "./pages/Admin/UpdatePackage";
-import EbookLibrary from "./pages/BookDetails/EbookLibrary";
 import OrderDetails from "./pages/Orders/OrderDetails";
 import PackageSection from "./pages/Package/Package";
 import PackageDetails from "./pages/Package/PackageDetails";
 import Checkout from "./pages/Payment/Checkout";
 import PaymentCancel from "./pages/Payment/PaymentCancel";
 import PaymentSuccess from "./pages/Payment/PaymentSuccess";
+import PrivacyPolicy from "./pages/Privacy/PrivacyPolicy";
 import Shop from "./pages/Shop/Shop";
+import TermsConditions from "./pages/Terms/TermsAndConditions";
 import Profile from "./pages/User/Profile";
 import Setting from "./pages/User/Setting";
 import UpdatePassword from "./pages/User/UpdatePassword";
 import UpdateProfile from "./pages/User/UpdateProfile";
 const App = () => {
   useEffect(() => {
-    enableContentProtection();
+    // enableContentProtection();
   }, []);
   return (
     <BrowserRouter>
@@ -66,6 +66,8 @@ const App = () => {
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/blog/:slug" element={<BlogDetails />} />
         <Route path="/shop" element={<Shop />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsConditions />} />
         <Route path="/packages" element={<PackageSection />} />
         <Route path="/package/:slug" element={<PackageDetails />} />
         <Route path="/ebook" element={<EBookPage />} />

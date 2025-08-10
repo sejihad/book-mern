@@ -7,10 +7,10 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Info */}
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold flex items-center">
-              <span className="text-indigo-600 mr-2">📚</span>
-              <span className="text-gray-800">Book Shop</span>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold flex items-center flex-wrap">
+              <span className="text-gray-800">Mind Storm Books Shop</span>
             </h2>
+
             <p className="text-gray-600">
               Your ultimate destination for quality books and reading
               experiences.
@@ -148,7 +148,8 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} Book Shop. All rights reserved.
+            © {new Date().getFullYear()} Mind Storm Books Shop. All rights
+            reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <Link
@@ -176,7 +177,7 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="text-indigo-600 hover:underline"
             >
-              digitalnexgen
+              Digital Nexgen
             </a>
           </p>
         </div>
