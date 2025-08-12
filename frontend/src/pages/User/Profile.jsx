@@ -104,6 +104,24 @@ const Profile = () => {
                         Change Password
                       </Link>
                     )}
+                    <Link
+                      to="/profile/delete"
+                      className="flex items-center text-red-600 hover:text-red-800"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 mr-2"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M6 8a1 1 0 011-1h6a1 1 0 011 1v7a2 2 0 01-2 2H8a2 2 0 01-2-2V8zm3-5a1 1 0 00-1 1v1H5.5a.5.5 0 000 1h9a.5.5 0 000-1H12V4a1 1 0 00-1-1H9z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Delete Account
+                    </Link>
                   </div>
                 </div>
 

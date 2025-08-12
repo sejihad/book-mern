@@ -45,19 +45,12 @@ const PackagesPage = () => {
   }, [dispatch]);
 
   const handleBuyNow = (item) => {
-    if (!user) {
-      navigate("/login");
-    } else if (user.country === "" || user.number === "") {
-      navigate("/profile/update");
-      toast.info("Complete Your Profile");
-    } else {
-      navigate("/checkout", {
-        state: {
-          cartItems: [item],
-          type: "package",
-        },
-      });
-    }
+    navigate("/checkout", {
+      state: {
+        cartItems: [item],
+        type: "package",
+      },
+    });
   };
 
   const addToCartHandler = (id, q) => {

@@ -96,19 +96,12 @@ const PackageDetails = () => {
   };
   const hasReviewed = pkg?.reviews?.some((r) => r.user === user?._id);
   const handleBuyNow = (item) => {
-    if (!user) {
-      navigate("/login");
-    } else if (user.country === "" || user.number === "") {
-      navigate("/profile/update");
-      toast.info("Complete Your Profile");
-    } else {
-      navigate("/checkout", {
-        state: {
-          cartItems: [item],
-          type: "package",
-        },
-      });
-    }
+    navigate("/checkout", {
+      state: {
+        cartItems: [item],
+        type: "package",
+      },
+    });
   };
 
   const incrementQuantity = () => setQuantity(quantity + 1);

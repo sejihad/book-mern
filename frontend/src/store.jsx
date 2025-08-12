@@ -54,6 +54,7 @@ import {
   forgotPasswordReducer,
   profileReducer,
   userDetailsReducer,
+  userEmailRequestReducer,
   userReducer,
 } from "./reducers/userReducer";
 
@@ -68,6 +69,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
   user: userReducer,
   profile: profileReducer,
+  userEmail: userEmailRequestReducer,
   forgotPassword: forgotPasswordReducer,
   userDetails: userDetailsReducer,
   allUsers: allUsersReducer,

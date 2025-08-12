@@ -144,8 +144,31 @@ const OrderDetails = () => {
               </div>
             </div>
 
-            {/* Shipping and Payment Info */}
+            {/* Customer and Shipping Info */}
             <div className="p-6 border-b border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Customer Info */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Customer Information
+                </h3>
+                <div className="space-y-2">
+                  <p className="text-gray-700">
+                    <span className="font-medium">Name:</span>{" "}
+                    {order.user?.name}
+                  </p>
+                  <p className="text-gray-700">
+                    <span className="font-medium">Email:</span>{" "}
+                    {order.user?.email}
+                  </p>
+                  {order.user?.number && (
+                    <p className="text-gray-700">
+                      <span className="font-medium">Phone:</span>{" "}
+                      {order.user.number}
+                    </p>
+                  )}
+                </div>
+              </div>
+
               {/* Shipping Info - Only show for non-ebook orders */}
               {order.order_type !== "ebook" && (
                 <div>
@@ -180,35 +203,32 @@ const OrderDetails = () => {
                   </div>
                 </div>
               )}
+            </div>
 
-              {/* Payment Info - Always shown */}
-              <div
-                className={order.order_type === "ebook" ? "md:col-span-2" : ""}
-              >
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Payment Information
-                </h3>
-                <div className="space-y-2">
+            {/* Payment Info */}
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Payment Information
+              </h3>
+              <div className="space-y-2">
+                <p className="text-gray-700">
+                  <span className="font-medium">Transaction ID:</span>{" "}
+                  {order.payment?.transactionId}
+                </p>
+                <p className="text-gray-700">
+                  <span className="font-medium">Items Price:</span> $
+                  {order.itemsPrice?.toFixed(2)}
+                </p>
+                {order.order_type !== "ebook" && (
                   <p className="text-gray-700">
-                    <span className="font-medium">Transaction ID:</span>{" "}
-                    {order.payment?.transactionId}
+                    <span className="font-medium">Shipping Price:</span> $
+                    {order.shippingPrice?.toFixed(2)}
                   </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Items Price:</span> $
-                    {order.itemsPrice?.toFixed(2)}
-                  </p>
-                  {/* Shipping Price - Only show for non-ebook orders */}
-                  {order.order_type !== "ebook" && (
-                    <p className="text-gray-700">
-                      <span className="font-medium">Shipping Price:</span> $
-                      {order.shippingPrice?.toFixed(2)}
-                    </p>
-                  )}
-                  <p className="text-gray-700 font-bold">
-                    <span className="font-medium">Total Paid:</span> $
-                    {order.totalPrice?.toFixed(2)}
-                  </p>
-                </div>
+                )}
+                <p className="text-gray-700 font-bold">
+                  <span className="font-medium">Total Paid:</span> $
+                  {order.totalPrice?.toFixed(2)}
+                </p>
               </div>
             </div>
 

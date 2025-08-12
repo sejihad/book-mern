@@ -101,15 +101,6 @@ const BookDetails = () => {
   };
   const hasReviewed = book?.reviews?.some((r) => r.user === user?._id);
   const handleBuyNow = (type, item) => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    if (!user.country || !user.number) {
-      navigate("/profile/update");
-      toast.info("Complete Your Profile");
-      return;
-    }
     navigate("/checkout", {
       state: {
         cartItems: [item],

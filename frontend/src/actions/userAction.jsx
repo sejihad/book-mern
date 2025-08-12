@@ -1,9 +1,15 @@
 import axios from "axios";
 import {
+  ACCOUNT_DELETE_FAIL,
+  ACCOUNT_DELETE_REQUEST,
+  ACCOUNT_DELETE_SUCCESS,
   ALL_USERS_FAIL,
   ALL_USERS_REQUEST,
   ALL_USERS_SUCCESS,
   CLEAR_ERRORS,
+  CONTACT_USER_FAIL,
+  CONTACT_USER_REQUEST,
+  CONTACT_USER_SUCCESS,
   DELETE_USER_FAIL,
   DELETE_USER_REQUEST,
   DELETE_USER_SUCCESS,
@@ -409,6 +415,62 @@ export const toggleTwoFactor = () => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: TOGGLE_2FA_FAIL,
+      payload: error.response?.data?.message || error.message,
+    });
+  }
+};
+export const DeleteAccountRequest = (userData) => async (dispatch) => {
+  try {
+    dispatch({ type: ACCOUNT_DELETE_REQUEST });
+    const token = localStorage.getItem("token");
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    const { data } = await axios.post(
+      `${API_URL}/api/v1/me/delete`,
+      userData,
+      config
+    );
+
+    dispatch({
+      type: ACCOUNT_DELETE_SUCCESS,
+      payload: data.success,
+    });
+  } catch (error) {
+    dispatch({
+      type: ACCOUNT_DELETE_FAIL,
+      payload: error.response?.data?.message || error.message,
+    });
+  }
+};
+export const ContactUs = (userData) => async (dispatch) => {
+  try {
+    dispatch({ type: CONTACT_USER_REQUEST });
+    const token = localStorage.getItem("token");
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    const { data } = await axios.post(
+      `${API_URL}/api/v1/contact/us`,
+      userData,
+      config
+    );
+
+    dispatch({
+      type: CONTACT_USER_SUCCESS,
+      payload: data.success,
+    });
+  } catch (error) {
+    dispatch({
+      type: CONTACT_USER_FAIL,
       payload: error.response?.data?.message || error.message,
     });
   }

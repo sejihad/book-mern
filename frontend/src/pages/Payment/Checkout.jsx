@@ -88,7 +88,18 @@ const Checkout = () => {
     };
     loadData();
   }, [dispatch, isEbook]);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      toast.info("Please login to proceed with checkout");
+      navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
 
+    if (!user?.country || !user?.number) {
+      toast.info("Complete Your Profile");
+      navigate("/profile/update");
+    }
+  }, [isAuthenticated, user, navigate, location.pathname]);
   // Handle country change (only if not ebook)
   useEffect(() => {
     if (isEbook || !selectedCountry) return;
@@ -122,17 +133,6 @@ const Checkout = () => {
 
   const handleStripePayment = async (e) => {
     e.preventDefault();
-    if (!user.country || !user.number) {
-      navigate("/profile/update");
-      toast.info("Complete Your Profile");
-      return;
-    }
-    // Validate authentication
-    if (!isAuthenticated) {
-      toast.info("Please login to proceed with payment");
-      navigate("/login", { state: { from: location.pathname } });
-      return;
-    }
 
     // Validate form completion (only if not ebook)
     if (!isEbook && !isFormComplete) {
@@ -162,17 +162,6 @@ const Checkout = () => {
 
   const handlePaypalPayment = async (e) => {
     e.preventDefault();
-    if (!user.country || !user.number) {
-      navigate("/profile/update");
-      toast.info("Complete Your Profile");
-      return;
-    }
-    // Validate authentication
-    if (!isAuthenticated) {
-      toast.info("Please login to proceed with payment");
-      navigate("/login", { state: { from: location.pathname } });
-      return;
-    }
 
     // Validate form completion (only if not ebook)
     if (!isEbook && !isFormComplete) {

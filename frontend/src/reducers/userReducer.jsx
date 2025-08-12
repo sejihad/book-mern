@@ -1,8 +1,16 @@
 import {
+  ACCOUNT_DELETE_FAIL,
+  ACCOUNT_DELETE_REQUEST,
+  ACCOUNT_DELETE_RESET,
+  ACCOUNT_DELETE_SUCCESS,
   ALL_USERS_FAIL,
   ALL_USERS_REQUEST,
   ALL_USERS_SUCCESS,
   CLEAR_ERRORS,
+  CONTACT_USER_FAIL,
+  CONTACT_USER_REQUEST,
+  CONTACT_USER_RESET,
+  CONTACT_USER_SUCCESS,
   DELETE_USER_FAIL,
   DELETE_USER_REQUEST,
   DELETE_USER_RESET,
@@ -236,12 +244,6 @@ export const profileReducer = (state = {}, action) => {
         isDeleted: false,
       };
 
-    case CLEAR_ERRORS:
-      return {
-        ...state,
-        error: null,
-      };
-
     default:
       return state;
   }
@@ -346,6 +348,43 @@ export const userDetailsReducer = (state = { user: {} }, action) => {
         error: null,
       };
 
+    default:
+      return state;
+  }
+};
+export const userEmailRequestReducer = (state = {}, action) => {
+  switch (action.type) {
+    case ACCOUNT_DELETE_REQUEST:
+    case CONTACT_USER_REQUEST:
+      return {
+        ...state,
+        loading: true,
+      };
+    case ACCOUNT_DELETE_SUCCESS:
+    case CONTACT_USER_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        success: action.payload,
+      };
+    case ACCOUNT_DELETE_FAIL:
+    case CONTACT_USER_FAIL:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+    case ACCOUNT_DELETE_RESET:
+    case CONTACT_USER_RESET:
+      return {
+        ...state,
+        success: false,
+      };
+    case CLEAR_ERRORS:
+      return {
+        ...state,
+        error: null,
+      };
     default:
       return state;
   }

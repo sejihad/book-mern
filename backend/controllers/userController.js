@@ -395,12 +395,52 @@ const getSingleUser = catchAsyncErrors(async (req, res, next) => {
     user,
   });
 });
+
+const deleteUserRequest = catchAsyncErrors(async (req, res, next) => {
+  const { name, email, report } = req.body;
+  const id = req.user._id;
+  if (!email || !report || !name) {
+    return next(new ErrorHandler("Please enter name, email and report", 400));
+  }
+
+  const message = `User Delete Request\n\nName: ${name}\nEmail: ${email}\nUser ID: ${id}\n\nReport: ${report}`;
+
+  await sendEmail({
+    email: process.env.SMTP_MAIL,
+    subject: "Account Delete Request",
+    message,
+  });
+
+  return res.status(200).json({
+    success: true,
+  });
+});
+const contactUs = catchAsyncErrors(async (req, res, next) => {
+  const { name, email, message } = req.body;
+
+  if (!email || !message || !name) {
+    return next(new ErrorHandler("Please enter name, email and report", 400));
+  }
+
+  const messageSent = `Name: ${name}\nEmail: ${email}\n\nMessage: ${message}`;
+
+  await sendEmail({
+    email: process.env.SMTP_MAIL,
+    subject: "Contact User",
+    message: messageSent,
+  });
+
+  return res.status(200).json({
+    success: true,
+  });
+});
 module.exports = {
   registerUser,
   loginUser,
   logoutUser,
   forgotPassword,
   resetPassword,
+  contactUs,
   getSingleUser,
   getUserDetails,
   updatePassword,
@@ -410,5 +450,6 @@ module.exports = {
   updateProfile,
   enableTwoFactor,
   verifyOtp,
+  deleteUserRequest,
   deleteUser,
 };

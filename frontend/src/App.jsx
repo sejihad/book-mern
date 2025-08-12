@@ -36,6 +36,7 @@ import EbookLibrary from "./pages/BookDetails/EbookLibrary";
 import BookCart from "./pages/Cart/BookCart";
 import EbookCart from "./pages/Cart/EbookCart";
 import PackageCart from "./pages/Cart/PackageCart";
+import Contact from "./pages/Contact/Contact";
 import EBookPage from "./pages/Ebook/EBookPage";
 import Home from "./pages/Home/Home";
 import NotFound from "./pages/NotFound/NotFound";
@@ -49,6 +50,7 @@ import PaymentSuccess from "./pages/Payment/PaymentSuccess";
 import PrivacyPolicy from "./pages/Privacy/PrivacyPolicy";
 import Shop from "./pages/Shop/Shop";
 import TermsConditions from "./pages/Terms/TermsAndConditions";
+import Delete from "./pages/User/Delete";
 import Profile from "./pages/User/Profile";
 import Setting from "./pages/User/Setting";
 import UpdatePassword from "./pages/User/UpdatePassword";
@@ -67,6 +69,7 @@ const App = () => {
         <Route path="/blog/:slug" element={<BlogDetails />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/terms" element={<TermsConditions />} />
         <Route path="/packages" element={<PackageSection />} />
         <Route path="/package/:slug" element={<PackageDetails />} />
@@ -101,6 +104,14 @@ const App = () => {
           element={
             <ProtectedRoute>
               <UpdateProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/delete"
+          element={
+            <ProtectedRoute>
+              <Delete />
             </ProtectedRoute>
           }
         />

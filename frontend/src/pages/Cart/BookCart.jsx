@@ -27,15 +27,6 @@ const BookCart = () => {
   };
 
   const goToCheckout = () => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    if (!user.country || !user.number) {
-      navigate("/profile/update");
-      toast.info("Complete Your Profile");
-      return;
-    }
     navigate("/checkout", {
       state: {
         cartItems: bookCartItems,

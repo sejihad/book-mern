@@ -18,6 +18,8 @@ const {
   deleteUser,
   getAllUser,
   getSingleUser,
+  deleteUserRequest,
+  contactUs,
 } = require("../controllers/userController");
 const { isAuthenticator, authorizeRoles } = require("../middleware/auth");
 
@@ -67,7 +69,8 @@ router.put("/password/reset/:token", resetPassword);
 router.get("/me", isAuthenticator, getUserDetails);
 router.put("/password/update", isAuthenticator, updatePassword);
 router.put("/me/update", isAuthenticator, updateProfile);
-
+router.post("/me/delete", isAuthenticator, deleteUserRequest);
+router.post("/contact/us", contactUs);
 router.get(
   "/admin/users",
   isAuthenticator,
