@@ -3,6 +3,7 @@ import {
   FaBook,
   FaBox,
   FaRegStar,
+  FaSearch,
   FaStar,
   FaStarHalfAlt,
 } from "react-icons/fa";
@@ -55,7 +56,6 @@ const PackagesPage = () => {
 
   const addToCartHandler = (id, q) => {
     dispatch(addItemsPackageToCart(id, q));
-
     toast.success("Package Added To Cart");
   };
 
@@ -73,9 +73,21 @@ const PackagesPage = () => {
           <Loader />
         ) : (
           <>
-            {/* Filter/Sort Controls (can be expanded) */}
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-800">
+            {/* Search and Filter Section */}
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+              <div className="relative w-full sm:w-64">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaSearch className="text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search packages..."
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800 whitespace-nowrap">
                 {filteredPackages.length} Packages Available
               </h2>
             </div>
@@ -97,19 +109,22 @@ const PackagesPage = () => {
                 {filteredPackages.map((pkg) => (
                   <div
                     key={pkg._id}
-                    className="bg-white border-amber-50 shadow-md hover:shadow-lg transition duration-300 overflow-hidden"
+                    className="bg-white border-amber-50 shadow-md hover:shadow-lg transition duration-300 overflow-hidden flex flex-col h-full"
                   >
+                    {/* Image Section */}
                     <div className="relative border-gray-200 group">
                       <Link
                         to={`/package/${slugify(pkg.name, {
                           lower: true,
                           strict: true,
                         })}`}
+                        className="block"
                       >
                         <img
                           src={pkg.image?.url}
                           alt={pkg.name}
                           className="w-full h-48 object-cover"
+                          loading="lazy"
                         />
                       </Link>
                       {pkg.oldPrice > pkg.discountPrice && (
@@ -125,30 +140,37 @@ const PackagesPage = () => {
                       )}
                     </div>
 
-                    <div className="p-4">
+                    {/* Content Section */}
+                    <div className="p-4 flex-grow flex flex-col">
+                      {/* Title */}
                       <Link
                         to={`/package/${slugify(pkg.name, {
                           lower: true,
                           strict: true,
                         })}`}
+                        className="block"
                       >
-                        <h3 className="text-lg font-semibold text-gray-800 hover:text-blue-600 mb-1">
+                        <h3 className="text-lg font-semibold text-gray-800 hover:text-blue-600 mb-1 line-clamp-2 h-14">
                           {pkg.name}
                         </h3>
                       </Link>
+
+                      {/* Rating */}
                       <StarRating rating={pkg.ratings || 0} />
 
                       {/* Package Info */}
                       <div className="mt-3 space-y-1 text-sm text-gray-600">
                         <div className="flex items-center">
-                          <FaBook className="mr-2 text-blue-500" />
-                          <span>
+                          <FaBook className="mr-2 text-blue-500 flex-shrink-0" />
+                          <span className="line-clamp-1">
                             {Object.keys(pkg.books || {}).length} books included
                           </span>
                         </div>
                         <div className="flex items-center">
-                          <FaBox className="mr-2 text-indigo-500" />
-                          <span>{pkg.deliveryTime || "Standard shipping"}</span>
+                          <FaBox className="mr-2 text-indigo-500 flex-shrink-0" />
+                          <span className="line-clamp-1">
+                            {pkg.deliveryTime || "Standard shipping"}
+                          </span>
                         </div>
                       </div>
 
@@ -166,8 +188,8 @@ const PackagesPage = () => {
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
-                      <div className="mt-4 space-y-2">
+                      {/* Action Buttons - pushed to bottom */}
+                      <div className="mt-auto pt-4 space-y-2">
                         <button
                           onClick={() =>
                             handleBuyNow({

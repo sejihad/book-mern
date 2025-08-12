@@ -58,7 +58,7 @@ const PackageSection = ({ title, packages, loading }) => {
         <section className="container mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">
-              {title} <span className="text-indigo-600">Books</span>
+              {title} <span className="text-indigo-600">Packages</span>
             </h2>
             <Link
               to="/packages"
@@ -73,11 +73,11 @@ const PackageSection = ({ title, packages, loading }) => {
               No packages added yet.
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 ">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {packages.map((pkg) => (
                 <div
                   key={pkg._id}
-                  className="bg-white  shadow-md hover:shadow-lg transition duration-300  border-amber-50 overflow-hidden "
+                  className="bg-white shadow-md hover:shadow-lg transition duration-300 border-amber-50 overflow-hidden flex flex-col h-full"
                 >
                   <div className="relative border-gray-200 group">
                     <Link
@@ -85,11 +85,13 @@ const PackageSection = ({ title, packages, loading }) => {
                         lower: true,
                         strict: true,
                       })}`}
+                      className="block"
                     >
                       <img
                         src={pkg.image?.url}
                         alt={pkg.name}
                         className="w-full h-48 object-cover"
+                        loading="lazy"
                       />
                     </Link>
                     {pkg.oldPrice > pkg.discountPrice && (
@@ -104,30 +106,34 @@ const PackageSection = ({ title, packages, loading }) => {
                     )}
                   </div>
 
-                  <div className="p-4">
+                  <div className="p-4 flex-grow flex flex-col">
                     <Link
                       to={`/package/${slugify(pkg.name, {
                         lower: true,
                         strict: true,
                       })}`}
+                      className="block"
                     >
-                      <h3 className="text-lg font-semibold text-gray-800 hover:text-blue-600 mb-1">
+                      <h3 className="text-lg font-semibold text-gray-800 hover:text-blue-600 mb-1 line-clamp-2 h-14">
                         {pkg.name}
                       </h3>
                     </Link>
+
                     <StarRating rating={pkg.ratings || 0} />
 
                     {/* Package Info */}
                     <div className="mt-3 space-y-1 text-sm text-gray-600">
                       <div className="flex items-center">
-                        <FaBook className="mr-2 text-blue-500" />
-                        <span>
+                        <FaBook className="mr-2 text-blue-500 flex-shrink-0" />
+                        <span className="line-clamp-1">
                           {Object.keys(pkg.books || {}).length} books included
                         </span>
                       </div>
                       <div className="flex items-center">
-                        <FaBox className="mr-2 text-indigo-500" />
-                        <span>{pkg.deliveryTime || "Standard shipping"}</span>
+                        <FaBox className="mr-2 text-indigo-500 flex-shrink-0" />
+                        <span className="line-clamp-1">
+                          {pkg.deliveryTime || "Standard shipping"}
+                        </span>
                       </div>
                     </div>
 
@@ -145,8 +151,8 @@ const PackageSection = ({ title, packages, loading }) => {
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="mt-4 space-y-2">
+                    {/* Action Buttons - pushed to bottom */}
+                    <div className="mt-auto pt-4 space-y-2">
                       <button
                         onClick={() =>
                           handleBuyNow({
