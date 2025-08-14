@@ -2,62 +2,60 @@ import { FaTrash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import {
-  addItemsBookToCart,
-  removeItemsBookFromCart,
-} from "../../actions/bookCartAction";
+import { addItemsToCart, removeItemsFromCart } from "../../actions/cartAction";
 
-const BookCart = () => {
+const Cart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { bookCartItems } = useSelector((state) => state.bookCart);
+  const { CartItems } = useSelector((state) => state.Cart);
   const { user } = useSelector((state) => state.user);
+
   const removeFromCart = (id) => {
-    dispatch(removeItemsBookFromCart(id));
+    dispatch(removeItemsFromCart(id));
     toast.success("Item Removed from Cart");
   };
 
-  const increaseQuantity = (id, quantity) => {
-    dispatch(addItemsBookToCart(id, quantity + 1));
+  const increaseQuantity = (type, id, quantity) => {
+    dispatch(addItemsToCart(type, id, quantity + 1));
   };
 
-  const decreaseQuantity = (id, quantity) => {
+  const decreaseQuantity = (type, id, quantity) => {
     if (quantity <= 1) return;
-    dispatch(addItemsBookToCart(id, quantity - 1));
+    dispatch(addItemsToCart(type, id, quantity - 1));
   };
 
   const goToCheckout = () => {
-    navigate("/checkout", {
-      state: {
-        cartItems: bookCartItems,
-        type: "book",
-      },
+    CartItems.map((item, i) => {
+      console.log(item.type);
+      navigate("/checkout", {
+        state: {
+          cartItems: CartItems,
+          type: item.type,
+        },
+      });
     });
   };
 
-  // ✅ Calculate total price
-  const totalPrice = bookCartItems.reduce((acc, item) => {
+  const totalPrice = CartItems.reduce((acc, item) => {
     const price = item.price;
     return acc + price * item.quantity;
   }, 0);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <h2 className="text-2xl font-semibold mb-6 text-center">
-        Your Book Cart
-      </h2>
+      <h2 className="text-2xl font-semibold mb-6 text-center">Your Cart</h2>
 
-      {bookCartItems.length === 0 ? (
+      {CartItems.length === 0 ? (
         <div className="text-center text-gray-600">
           Your cart is empty. <br />
           <Link to="/shop" className="text-blue-600 hover:underline">
-            Browse Books
+            Shopping
           </Link>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-1 divide-y bg-white rounded shadow-md">
-            {bookCartItems.map((item) => {
+            {CartItems.map((item) => {
               const price = item.discountPrice || item.price;
               const subtotal = price * item.quantity;
 
@@ -74,27 +72,53 @@ const BookCart = () => {
                     />
                   </div>
                   <div className="col-span-2">
-                    <h3 className="text-lg font-semibold">{item.name}</h3>
+                    <h3 className="text-lg font-semibold">
+                      {item.name}
+                      {""}
+                      {item.title}
+                    </h3>
                     <p className="text-indigo-600 font-medium">
                       Price: ${price.toFixed(2)}
                     </p>
+                    <p className="text-green-600 font-medium">
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full 
+                ${
+                  item.type === "ebook"
+                    ? "bg-purple-100 text-purple-800"
+                    : item.type === "book"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-orange-100 text-orange-800"
+                }`}
+                      >
+                        {item.type}
+                      </span>
+                    </p>
                   </div>
                   <div className="col-span-1">
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => decreaseQuantity(item.id, item.quantity)}
-                        className="bg-gray-300 px-2 rounded"
-                      >
-                        -
-                      </button>
+                    {item.type === "ebook" ? (
                       <span className="px-2">{item.quantity}</span>
-                      <button
-                        onClick={() => increaseQuantity(item.id, item.quantity)}
-                        className="bg-gray-300 px-2 rounded"
-                      >
-                        +
-                      </button>
-                    </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() =>
+                            decreaseQuantity(item.type, item.id, item.quantity)
+                          }
+                          className="bg-gray-300 px-2 rounded"
+                        >
+                          -
+                        </button>
+                        <span className="px-2">{item.quantity}</span>
+                        <button
+                          onClick={() =>
+                            increaseQuantity(item.type, item.id, item.quantity)
+                          }
+                          className="bg-gray-300 px-2 rounded"
+                        >
+                          +
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div className="col-span-1 text-right font-semibold">
                     ${subtotal.toFixed(2)}
@@ -113,7 +137,6 @@ const BookCart = () => {
             })}
           </div>
 
-          {/* ✅ Total Summary */}
           <div className="flex justify-end mt-6">
             <div className="bg-white shadow-md rounded p-4 w-full max-w-sm">
               <h3 className="text-xl font-semibold mb-4 text-center">
@@ -143,4 +166,4 @@ const BookCart = () => {
   );
 };
 
-export default BookCart;
+export default Cart;

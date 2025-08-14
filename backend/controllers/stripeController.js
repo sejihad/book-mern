@@ -2,16 +2,70 @@ const dotenv = require("dotenv");
 const Stripe = require("stripe");
 const Order = require("../models/orderModel");
 const User = require("../models/userModel");
+const Book = require("../models/bookModel");
+const Package = require("../models/packageModel");
 
 dotenv.config();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// Helper function to determine order type
+const determineOrderType = (orderItems) => {
+  const uniqueTypes = [...new Set(orderItems.map((item) => item.type))];
+
+  if (uniqueTypes.length === 1) {
+    return uniqueTypes[0]; // "ebook", "book", or "package"
+  }
+  return "mixed"; // multiple types in order
+};
+
+// Function to fetch complete item details
+const getItemDetails = async (items) => {
+  const detailedItems = await Promise.all(
+    items.map(async (item) => {
+      try {
+        if (item.type === "book" || item.type === "ebook") {
+          const book = await Book.findById(item.id).select(
+            "name  discountPrice image type"
+          );
+          return {
+            id: item.id,
+            type: item.type,
+            quantity: item.quantity,
+            name: book?.name,
+            price: book?.discountPrice,
+            image: book?.image?.url,
+          };
+        } else if (item.type === "package") {
+          const package = await Package.findById(item.id).select(
+            "name discountPrice image type"
+          );
+          return {
+            id: item.id,
+            type: item.type,
+            quantity: item.quantity,
+            name: package?.name,
+            price: package?.discountPrice,
+            image: package?.image?.url,
+          };
+        }
+        return item; // fallback
+      } catch (error) {
+        return item; // return basic info if error occurs
+      }
+    })
+  );
+  return detailedItems;
+};
 
 // Create Checkout Session
 const createCheckoutSession = async (req, res, next) => {
   try {
     const { shippingInfo, orderItems, itemsPrice, shippingPrice, totalPrice } =
       req.body;
+
+    const orderType = determineOrderType(orderItems);
+    const isEbookOnly = orderType === "ebook";
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -32,11 +86,12 @@ const createCheckoutSession = async (req, res, next) => {
       ],
       metadata: {
         userId: req.user._id.toString(),
-        shippingInfo: JSON.stringify(shippingInfo),
-        orderItems: JSON.stringify(orderItems),
+        shippingInfo: JSON.stringify(isEbookOnly ? {} : shippingInfo),
+        orderItems: JSON.stringify(orderItems), // Still send minimal items here
         itemsPrice: itemsPrice.toString(),
-        shippingPrice: shippingPrice.toString(),
+        shippingPrice: isEbookOnly ? "0" : shippingPrice.toString(),
         totalPrice: totalPrice.toString(),
+        orderType: orderType,
       },
     });
 
@@ -77,21 +132,18 @@ const stripeWebhook = async (req, res) => {
     if (!user) return res.status(404).send("User not found");
 
     // Parse session metadata
-    const orderItems = JSON.parse(session.metadata.orderItems);
+    const minimalOrderItems = JSON.parse(session.metadata.orderItems);
     const shippingInfo = JSON.parse(session.metadata.shippingInfo);
     const itemsPrice = Number(session.metadata.itemsPrice);
     const shippingPrice = Number(session.metadata.shippingPrice);
     const totalPrice = Number(session.metadata.totalPrice);
+    const orderType = session.metadata.orderType;
+    const isEbookOnly = orderType === "ebook";
 
-    // Detect order_type
-    // Step 1: All types in orderItems
-    const itemTypes = [...new Set(orderItems.map((item) => item.type))];
+    // Fetch complete item details from appropriate models
+    const completeOrderItems = await getItemDetails(minimalOrderItems);
 
-    // Step 3: Use that type as order_type
-    const order_type = itemTypes[0]; // "book", "ebook", or "package"
-    const isEbookOnly = order_type === "ebook";
-
-    // Step 4: Create Order
+    // Create Order with complete item details
     const order = new Order({
       user: {
         id: user._id,
@@ -101,7 +153,7 @@ const stripeWebhook = async (req, res) => {
         country: user.country || "",
       },
       shippingInfo: isEbookOnly ? {} : shippingInfo,
-      orderItems: orderItems,
+      orderItems: completeOrderItems,
       itemsPrice: itemsPrice,
       shippingPrice: isEbookOnly ? 0 : shippingPrice,
       totalPrice: totalPrice,
@@ -110,7 +162,7 @@ const stripeWebhook = async (req, res) => {
         transactionId: session.payment_intent,
         status: "paid",
       },
-      order_type: order_type, // "book" / "ebook" / "package"
+      order_type: orderType,
       order_status: isEbookOnly ? "completed" : "pending",
     });
 

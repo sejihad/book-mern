@@ -22,6 +22,18 @@ const getSingleOrder = catchAsyncErrors(async (req, res, next) => {
     order,
   });
 });
+const getSingleAdminOrder = catchAsyncErrors(async (req, res, next) => {
+  const order = await Order.findById(req.params.id);
+  console.log(order);
+  if (!order) {
+    return next(new ErrorHandler("Order not found with this ID", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    order,
+  });
+});
 
 // get logged in user  Orders
 const myOrders = catchAsyncErrors(async (req, res, next) => {
@@ -85,4 +97,5 @@ module.exports = {
   getAllOrders,
   updateOrder,
   deleteOrder,
+  getSingleAdminOrder,
 };

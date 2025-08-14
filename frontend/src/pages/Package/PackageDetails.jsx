@@ -9,12 +9,12 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { addItemsToCart } from "../../actions/cartAction";
 import { myOrders } from "../../actions/orderAction";
 import {
   getPackageDetails,
   newPacakgeReview,
 } from "../../actions/packageAction";
-import { addItemsPackageToCart } from "../../actions/packageCartAction";
 import Loader from "../../component/layout/Loader/Loader";
 import { NEW_REVIEW_RESET } from "../../constants/packageConstants";
 
@@ -76,9 +76,9 @@ const PackageDetails = () => {
   );
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [activeBookTab, setActiveBookTab] = useState(1);
+  const [activeBookTab, setActiveBookTab] = useState(0); // Start with first book
   const [review, setReview] = useState({ rating: 0, comment: "" });
-  // const [showPdf, setShowPdf] = useState(false);
+
   useEffect(() => {
     dispatch(getPackageDetails(slug));
     dispatch(myOrders());
@@ -90,10 +90,11 @@ const PackageDetails = () => {
   }, [dispatch, slug, reviewSuccess]);
 
   const addToCartHandler = () => {
-    dispatch(addItemsPackageToCart(pkg._id, quantity));
-    navigate("/package/cart");
+    dispatch(addItemsToCart("package", pkg._id, quantity));
+    navigate("/cart");
     toast.success("Package Added To Cart");
   };
+
   const hasReviewed = pkg?.reviews?.some((r) => r.user === user?._id);
   const handleBuyNow = (item) => {
     navigate("/checkout", {
@@ -128,55 +129,6 @@ const PackageDetails = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* {showPdf && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full h-[90vh] max-w-6xl relative flex flex-col">
-         
-            <button
-              onClick={() => setShowPdf(false)}
-              className="absolute top-3 right-3 text-gray-500 hover:text-red-600 text-3xl font-bold z-50"
-            >
-              &times;
-            </button>
-
-            <div className="p-4 border-b">
-              <h2 className="text-2xl font-semibold text-center text-gray-800">
-                📘 Sample Book Preview
-              </h2>
-            </div>
-
-            <div className="flex-1 relative overflow-hidden">
-              
-              <div className="absolute inset-0">
-                <iframe
-                  src={`${book.demoPdf.url}#toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0`}
-                  title="Sample PDF"
-                  className="w-full h-full"
-                  frameBorder="0"
-                  allowFullScreen
-                ></iframe>
-
-                
-                <div
-                  className="absolute inset-0 z-10 pointer-events-none"
-                  onContextMenu={(e) => e.preventDefault()}
-                ></div>
-              </div>
-            </div>
-
-     
-            <div className="p-4 border-t flex justify-between items-center bg-gray-50">
-              <span className="text-sm text-gray-600">Read-only preview</span>
-              <button
-                onClick={() => setShowPdf(false)}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-              >
-                Close Preview
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
       {/* Main Package Section - 3 Column Layout */}
       <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-8">
         {/* Left Column - Package Images */}
@@ -219,7 +171,12 @@ const PackageDetails = () => {
         {/* Middle Column - Package Information */}
         <div className="md:col-span-1">
           <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 h-full">
-            <h1 className="text-xl font-bold text-gray-900 mb-2">{pkg.name}</h1>
+            <div className="mb-2">
+              <h1 className="text-xl font-bold text-gray-900">{pkg.name}</h1>
+              {pkg.title && (
+                <p className="text-gray-500 opacity-80">{pkg.title}</p>
+              )}
+            </div>
 
             <div className="flex items-center mb-4">
               <StarRating rating={pkg.ratings || 0} />
@@ -235,134 +192,128 @@ const PackageDetails = () => {
               </p>
             </div>
 
-            {/* Books in Package */}
+            {/* Books in Package - Dynamic */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">Books Included</h3>
-              <div className="border-b border-gray-200 mb-4">
-                <nav className="-mb-px flex space-x-4 overflow-x-auto">
-                  {[1, 2, 3].map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveBookTab(tab)}
-                      className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
-                        activeBookTab === tab
-                          ? "border-indigo-500 text-indigo-600"
-                          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                      }`}
-                    >
-                      Book {tab}
-                    </button>
-                  ))}
-                </nav>
-              </div>
+              <h3 className="text-lg font-semibold mb-2">
+                Books Included ({pkg.books?.length || 0})
+              </h3>
 
-              {pkg.books && (
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-medium">
-                      {pkg.books[`book${activeBookTab}`]?.name}
-                    </h4>
-                    <p className="text-gray-600">
-                      by {pkg.books[`book${activeBookTab}`]?.writer}
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <span className="text-gray-500">Publisher:</span>{" "}
-                      {pkg.books[`book${activeBookTab}`]?.publisher || "N/A"}
-                    </div>
-                    <div className="flex items-center">
-                      <span className="text-sm">
-                        Published:{" "}
-                        {pkg.books[`book${activeBookTab}`]?.publishDate &&
-                          new Date(
-                            pkg.books[`book${activeBookTab}`].publishDate
-                          ).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
-                      </span>
-                    </div>
-
-                    <div>
-                      <span className="text-gray-500">Language:</span>{" "}
-                      {pkg.books[`book${activeBookTab}`]?.language || "N/A"}
-                    </div>
-                    <div>
-                      <span className="text-gray-500">ISBN-10:</span>{" "}
-                      {pkg.books[`book${activeBookTab}`]?.isbn10 || "N/A"}
-                    </div>
-                    <div>
-                      <span className="text-gray-500">ISBN-13:</span>{" "}
-                      {pkg.books[`book${activeBookTab}`]?.isbn13 || "N/A"}
-                    </div>
-                  </div>
-                  {pkg.books[`book${activeBookTab}`]?.demoPdf?.url && (
-                    <button
-                      onClick={() => setShowPdf(true)}
-                      className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md transition"
-                    >
-                      Read Sample PDF
-                    </button>
-                  )}
-
-                  {/* PDF Preview Modal */}
-                  {showPdf && (
-                    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-                      <div className="bg-white rounded-xl shadow-2xl w-full h-[90vh] max-w-6xl relative flex flex-col">
-                        {/* Close button */}
+              {pkg.books?.length > 0 && (
+                <>
+                  <div className="border-b border-gray-200 mb-4">
+                    <nav className="-mb-px flex space-x-4 overflow-x-auto">
+                      {pkg.books.map((book, index) => (
                         <button
-                          onClick={() => setShowPdf(false)}
-                          className="absolute top-3 right-3 text-gray-500 hover:text-red-600 text-3xl font-bold z-50"
+                          key={index}
+                          onClick={() => setActiveBookTab(index)}
+                          className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                            activeBookTab === index
+                              ? "border-indigo-500 text-indigo-600"
+                              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                          }`}
                         >
-                          &times;
+                          Book {index + 1}
                         </button>
+                      ))}
+                    </nav>
+                  </div>
 
-                        {/* Modal Header */}
-                        <div className="p-4 border-b">
-                          <h2 className="text-2xl font-semibold text-center text-gray-800">
-                            📘 Sample Book Preview
-                          </h2>
-                        </div>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium">
+                        {pkg.books[activeBookTab]?.name}
+                      </h4>
+                      <p className="text-gray-600">
+                        by {pkg.books[activeBookTab]?.writer}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-gray-500">Publisher:</span>{" "}
+                        {pkg.books[activeBookTab]?.publisher || "N/A"}
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-sm">
+                          Published:{" "}
+                          {pkg.books[activeBookTab]?.publishDate &&
+                            new Date(
+                              pkg.books[activeBookTab].publishDate
+                            ).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                        </span>
+                      </div>
 
-                        {/* PDF Container */}
-                        <div className="flex-1 relative overflow-hidden">
-                          {/* PDF Viewer with restricted interactions */}
-                          <div className="absolute inset-0">
-                            <iframe
-                              src={`${
-                                pkg.books[`book${activeBookTab}`].demoPdf.url
-                              }#toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0`}
-                              title="Sample PDF"
-                              className="w-full h-full"
-                              frameBorder="0"
-                              allowFullScreen
-                            ></iframe>
+                      <div>
+                        <span className="text-gray-500">Language:</span>{" "}
+                        {pkg.books[activeBookTab]?.language || "N/A"}
+                      </div>
 
-                            {/* Block right-click and other interactions */}
-                            <div
-                              className="absolute inset-0 z-10 pointer-events-none"
-                              onContextMenu={(e) => e.preventDefault()}
-                            ></div>
-                          </div>
-                        </div>
-
-                        {/* Custom Controls */}
-                        <div className="p-4 border-t flex justify-between items-center bg-gray-50">
-                          <span className="text-sm text-gray-600">
-                            Read-only preview
-                          </span>
-                          <button
-                            onClick={() => setShowPdf(false)}
-                            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                          >
-                            Close Preview
-                          </button>
-                        </div>
+                      <div>
+                        <span className="text-gray-500">ISBN-13:</span>{" "}
+                        {pkg.books[activeBookTab]?.isbn13 || "N/A"}
                       </div>
                     </div>
-                  )}
+                    {pkg.books[activeBookTab]?.demoPdf?.url && (
+                      <button
+                        onClick={() => setShowPdf(true)}
+                        className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md transition"
+                      >
+                        Read Sample PDF
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* PDF Preview Modal */}
+              {showPdf && pkg.books[activeBookTab]?.demoPdf?.url && (
+                <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+                  <div className="bg-white rounded-xl shadow-2xl w-full h-[90vh] max-w-6xl relative flex flex-col">
+                    <button
+                      onClick={() => setShowPdf(false)}
+                      className="absolute top-3 right-3 text-gray-500 hover:text-red-600 text-3xl font-bold z-50"
+                    >
+                      &times;
+                    </button>
+
+                    <div className="p-4 border-b">
+                      <h2 className="text-2xl font-semibold text-center text-gray-800">
+                        📘 Sample Book Preview
+                      </h2>
+                    </div>
+
+                    <div className="flex-1 relative overflow-hidden">
+                      <div className="absolute inset-0">
+                        <iframe
+                          src={`${pkg.books[activeBookTab].demoPdf.url}#toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0`}
+                          title="Sample PDF"
+                          className="w-full h-full"
+                          frameBorder="0"
+                          allowFullScreen
+                        ></iframe>
+
+                        <div
+                          className="absolute inset-0 z-10 pointer-events-none"
+                          onContextMenu={(e) => e.preventDefault()}
+                        ></div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 border-t flex justify-between items-center bg-gray-50">
+                      <span className="text-sm text-gray-600">
+                        Read-only preview
+                      </span>
+                      <button
+                        onClick={() => setShowPdf(false)}
+                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                      >
+                        Close Preview
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

@@ -19,11 +19,29 @@ const EbookLibrary = () => {
     dispatch(getBook());
   }, [dispatch]);
 
-  const ebookOrders = orders?.filter(
-    (order) =>
-      order.order_type === "ebook" && order.order_status === "completed"
-  );
+  const ebookOrders = orders
+    ?.filter((order) => order.payment?.status === "paid") // paid orders
+    .map((order) => {
+      if (order.order_type === "ebook") {
+        // Pure ebook order → 그대로 দেখাও
+        return order;
+      } else if (order.order_type === "mixed") {
+        // Mixed order → শুধু ebook items রাখো
+        const ebookItems = order.orderItems?.filter(
+          (item) => item.type === "ebook"
+        );
 
+        if (ebookItems.length > 0) {
+          return { ...order, orderItems: ebookItems };
+        }
+      }
+
+      // baki sob ignore
+      return null;
+    })
+    .filter(Boolean); // null remove
+
+  console.log(ebookOrders);
   const openPdfViewer = (ebook) => {
     setCurrentEbook(ebook);
     setShowPdf(true);

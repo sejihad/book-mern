@@ -5,7 +5,6 @@ import {
   FaCloudDownloadAlt,
   FaCog,
   FaShoppingBag,
-  FaShoppingCart,
   FaSignInAlt,
   FaSignOutAlt,
   FaTachometerAlt,
@@ -23,13 +22,10 @@ const Header = () => {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
 
-  const [bookCartCount, setBookCartCount] = useState(0);
-  const [ebookCartCount, setEbookCartCount] = useState(0);
-  const [packageCartCount, setPackageCartCount] = useState(0);
   const [cartItemCount, setCartItemCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showCartMenu, setShowCartMenu] = useState(false);
+
   const [showCategories, setShowCategories] = useState(false);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
@@ -45,28 +41,14 @@ const Header = () => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { categories } = useSelector((state) => state.categories);
   useEffect(() => {
-    const bookCart = JSON.parse(localStorage.getItem("bookCartItems")) || [];
-    const ebookCart = JSON.parse(localStorage.getItem("ebookCartItems")) || [];
-    const packageCart =
-      JSON.parse(localStorage.getItem("packageCartItems")) || [];
+    const Cart = JSON.parse(localStorage.getItem("CartItems")) || [];
 
-    const bookCount = bookCart.reduce(
-      (total, item) => total + (item.quantity || 1),
-      0
-    );
-    const ebookCount = ebookCart.reduce(
-      (total, item) => total + (item.quantity || 1),
-      0
-    );
-    const packageCount = packageCart.reduce(
+    const cartCount = Cart.reduce(
       (total, item) => total + (item.quantity || 1),
       0
     );
 
-    setBookCartCount(bookCount);
-    setEbookCartCount(ebookCount);
-    setPackageCartCount(packageCount);
-    setCartItemCount(bookCount + ebookCount + packageCount);
+    setCartItemCount(cartCount);
   }, []);
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -193,57 +175,14 @@ const Header = () => {
           {/* Icons */}
           <div className="flex items-center gap-4 text-gray-700 text-xl relative">
             <div className="relative">
-              <FiShoppingBag
-                onClick={() => setShowCartMenu(!showCartMenu)}
-                className="hover:text-indigo-600 transition cursor-pointer text-2xl"
-              />
-              {cartItemCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
-                  {cartItemCount}
-                </span>
-              )}
-
-              {showCartMenu && (
-                <div className="absolute right-0 mt-2 w-56 bg-white border shadow-xl rounded-lg z-50">
-                  <div className="flex flex-col">
-                    <Link
-                      to="/book/cart"
-                      className="flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-indigo-700 transition-colors duration-200 rounded-md"
-                    >
-                      <span className="flex items-center gap-2">
-                        <FaShoppingCart /> Book Cart
-                      </span>
-                      <span className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                        {bookCartCount}
-                      </span>
-                    </Link>
-
-                    <Link
-                      to="/ebook/cart"
-                      className="flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-indigo-700 transition-colors duration-200 rounded-md"
-                    >
-                      <span className="flex items-center gap-2">
-                        <FaShoppingCart /> Ebook Cart
-                      </span>
-                      <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                        {ebookCartCount}
-                      </span>
-                    </Link>
-
-                    <Link
-                      to="/package/cart"
-                      className="flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-indigo-700 transition-colors duration-200 rounded-md"
-                    >
-                      <span className="flex items-center gap-2">
-                        <FaShoppingCart /> Package Cart
-                      </span>
-                      <span className="bg-purple-100 text-purple-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                        {packageCartCount}
-                      </span>
-                    </Link>
-                  </div>
-                </div>
-              )}
+              <Link to="/cart">
+                <FiShoppingBag className="hover:text-indigo-600 transition cursor-pointer text-2xl" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Link>
             </div>
 
             {/* Search Icon */}

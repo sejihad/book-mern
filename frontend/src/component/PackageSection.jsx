@@ -6,11 +6,11 @@ import {
   FaStar,
   FaStarHalfAlt,
 } from "react-icons/fa";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import slugify from "slugify";
-import { addItemsPackageToCart } from "../actions/packageCartAction";
+import { addItemsToCart } from "../actions/cartAction";
 import Loader from "./layout/Loader/Loader";
 
 const StarRating = ({ rating }) => {
@@ -34,7 +34,6 @@ const StarRating = ({ rating }) => {
 const PackageSection = ({ title, packages, loading }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.user);
 
   const handleBuyNow = (item) => {
     navigate("/checkout", {
@@ -46,7 +45,8 @@ const PackageSection = ({ title, packages, loading }) => {
   };
 
   const addToCartHandler = (id, q) => {
-    dispatch(addItemsPackageToCart(id, q));
+    dispatch(addItemsToCart("package", id, q));
+
     toast.success("Package Added To Cart");
   };
 
@@ -58,7 +58,7 @@ const PackageSection = ({ title, packages, loading }) => {
         <section className="container mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">
-              {title} <span className="text-indigo-600">Packages</span>
+              {title} <span className="text-indigo-600">Books</span>
             </h2>
             <Link
               to="/packages"

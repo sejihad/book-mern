@@ -3,8 +3,8 @@ import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import slugify from "slugify";
-import { addItemsBookToCart } from "../actions/bookCartAction";
-import { addItemsEbookToCart } from "../actions/ebookCartAction";
+import { addItemsToCart } from "../actions/cartAction";
+
 import Loader from "./layout/Loader/Loader";
 
 const StarRating = ({ rating }) => {
@@ -38,13 +38,13 @@ const BookSection = ({ title, books, loading }) => {
     });
   };
 
-  const addToCartBookHandler = (id, q) => {
-    dispatch(addItemsBookToCart(id, q));
+  const addToCartBookHandler = (type, id, q) => {
+    dispatch(addItemsToCart(type, id, q));
     toast.success("Item Added To Cart");
   };
 
-  const addToCartEbookHandler = (id, q) => {
-    dispatch(addItemsEbookToCart(id, q));
+  const addToCartEbookHandler = (type, id, q) => {
+    dispatch(addItemsToCart(type, id, q));
     toast.success("Item Added To Cart");
   };
 
@@ -156,7 +156,9 @@ const BookSection = ({ title, books, loading }) => {
                       </button>
                       {book.type === "ebook" && (
                         <button
-                          onClick={() => addToCartEbookHandler(book._id, 1)}
+                          onClick={() =>
+                            addToCartEbookHandler("book", book._id, 1)
+                          }
                           className="mt-2 w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold py-2 hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 cursor-pointer"
                         >
                           Add to Cart
@@ -164,7 +166,9 @@ const BookSection = ({ title, books, loading }) => {
                       )}
                       {book.type === "book" && (
                         <button
-                          onClick={() => addToCartBookHandler(book._id, 1)}
+                          onClick={() =>
+                            addToCartBookHandler("book", book._id, 1)
+                          }
                           className="mt-2 w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold py-2 hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 cursor-pointer"
                         >
                           Add to Cart

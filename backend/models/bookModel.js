@@ -7,6 +7,11 @@ const bookSchema = new mongoose.Schema({
     required: [true, "Please Enter book Name"],
     trim: true,
   },
+  title: {
+    type: String,
+    required: [true, "Please Enter book Title"],
+    trim: true,
+  },
   description: {
     type: String,
     required: [true, "Please Enter book Description"],
@@ -48,10 +53,7 @@ const bookSchema = new mongoose.Schema({
   deliverToCountries: {
     type: String,
   },
-  // ISBN Fields
-  isbn10: {
-    type: String,
-  },
+
   isbn13: {
     type: String,
   },

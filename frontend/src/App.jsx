@@ -33,9 +33,7 @@ import BookPage from "./pages/Book/BookPage";
 import CatBook from "./pages/Book/CatBook";
 import BookDetails from "./pages/BookDetails/BookDetails";
 import EbookLibrary from "./pages/BookDetails/EbookLibrary";
-import BookCart from "./pages/Cart/BookCart";
-import EbookCart from "./pages/Cart/EbookCart";
-import PackageCart from "./pages/Cart/PackageCart";
+import Cart from "./pages/Cart/Cart";
 import Contact from "./pages/Contact/Contact";
 import EBookPage from "./pages/Ebook/EBookPage";
 import Home from "./pages/Home/Home";
@@ -74,9 +72,7 @@ const App = () => {
         <Route path="/packages" element={<PackageSection />} />
         <Route path="/package/:slug" element={<PackageDetails />} />
         <Route path="/ebook" element={<EBookPage />} />
-        <Route path="/ebook/cart" element={<EbookCart />} />
-        <Route path="/book/cart" element={<BookCart />} />
-        <Route path="/package/cart" element={<PackageCart />} />
+        <Route path="/cart" element={<Cart />} />
 
         <Route path="/books/:category" element={<BookPage />} />
         <Route path="/category/:category" element={<CatBook />} />

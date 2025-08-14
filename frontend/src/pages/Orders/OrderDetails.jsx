@@ -233,6 +233,7 @@ const OrderDetails = () => {
             </div>
 
             {/* Order Items */}
+            {/* Order Items */}
             <div className="p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 Order Items
@@ -243,6 +244,9 @@ const OrderDetails = () => {
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Product
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Type
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Price
@@ -276,6 +280,20 @@ const OrderDetails = () => {
                               </div>
                             </div>
                           </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-1 text-xs font-semibold rounded-full 
+                ${
+                  item.type === "ebook"
+                    ? "bg-purple-100 text-purple-800"
+                    : item.type === "book"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-orange-100 text-orange-800"
+                }`}
+                          >
+                            {item.type}
+                          </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           ${item.price.toFixed(2)}

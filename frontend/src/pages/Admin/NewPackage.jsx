@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FiPlus, FiUpload, FiX } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiUpload, FiX } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -16,56 +16,36 @@ const NewPackage = () => {
   const { loading, error, success } = useSelector((state) => state.newPackage);
   const { categories } = useSelector((state) => state.categories);
 
+  const initialBookData = {
+    name: "",
+    writer: "",
+    language: "",
+    publisher: "",
+    publishDate: "",
+
+    isbn13: "",
+    category: "",
+    demoPdfFile: null,
+    demoPdfPreview: null,
+  };
+
   const [formData, setFormData] = useState({
     name: "",
+    title: "",
     description: "",
     oldPrice: "",
     discountPrice: "",
     deliveryTime: "",
     deliverToCountries: "",
     videoLink: "",
-    books: {
-      book1: {
-        name: "",
-        writer: "",
-        language: "",
-        publisher: "",
-        publishDate: "",
-        isbn10: "",
-        isbn13: "",
-        category: "",
-        demoPdf: null,
-      },
-      book2: {
-        name: "",
-        writer: "",
-        language: "",
-        publisher: "",
-        publishDate: "",
-        isbn10: "",
-        isbn13: "",
-        category: "",
-        demoPdf: null,
-      },
-      book3: {
-        name: "",
-        writer: "",
-        language: "",
-        publisher: "",
-        publishDate: "",
-        isbn10: "",
-        isbn13: "",
-        category: "",
-        demoPdf: null,
-      },
-    },
+    books: [JSON.parse(JSON.stringify(initialBookData))],
   });
 
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [images, setImages] = useState([]);
   const [imagesPreview, setImagesPreview] = useState([]);
-  const [activeBookTab, setActiveBookTab] = useState(1);
+  const [activeBookTab, setActiveBookTab] = useState(0);
 
   useEffect(() => {
     dispatch(getCategory());
@@ -90,26 +70,66 @@ const NewPackage = () => {
     });
   };
 
-  const handleBookInputChange = (e, bookNumber) => {
+  const handleBookInputChange = (e, bookIndex) => {
     const { name, value } = e.target;
+    const updatedBooks = [...formData.books];
+    updatedBooks[bookIndex] = {
+      ...updatedBooks[bookIndex],
+      [name]: value,
+    };
     setFormData({
       ...formData,
-      books: {
-        ...formData.books,
-        [`book${bookNumber}`]: {
-          ...formData.books[`book${bookNumber}`],
-          [name]: value,
-        },
-      },
+      books: updatedBooks,
     });
+  };
+
+  const addNewBook = () => {
+    if (formData.books.length >= 20) {
+      toast.warning("Maximum 20 books allowed per package");
+      return;
+    }
+    setFormData({
+      ...formData,
+      books: [...formData.books, JSON.parse(JSON.stringify(initialBookData))],
+    });
+    setActiveBookTab(formData.books.length);
+  };
+
+  const removeBook = (index) => {
+    if (formData.books.length <= 1) {
+      toast.warning("At least one book is required");
+      return;
+    }
+
+    // Clean up the preview URL if it exists
+    if (formData.books[index].demoPdfPreview) {
+      URL.revokeObjectURL(formData.books[index].demoPdfPreview);
+    }
+
+    const updatedBooks = formData.books.filter((_, i) => i !== index);
+    setFormData({
+      ...formData,
+      books: updatedBooks,
+    });
+
+    if (activeBookTab >= updatedBooks.length) {
+      setActiveBookTab(updatedBooks.length - 1);
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (formData.books.length < 1) {
+      toast.error("Please add at least one book");
+      return;
+    }
+
     const data = new FormData();
 
     // Package data
     data.set("name", formData.name);
+    data.set("title", formData.title);
     data.set("description", formData.description);
     data.set("oldPrice", formData.oldPrice);
     data.set("discountPrice", formData.discountPrice);
@@ -118,28 +138,20 @@ const NewPackage = () => {
     if (formData.videoLink) data.set("videoLink", formData.videoLink);
 
     // Books data
-    for (let i = 1; i <= 3; i++) {
-      const book = formData.books[`book${i}`];
-      data.set(`books[book${i}][name]`, book.name);
-      data.set(`books[book${i}][writer]`, book.writer);
-      data.set(`books[book${i}][language]`, book.language);
-      data.set(`books[book${i}][publisher]`, book.publisher || "");
-      data.set(`books[book${i}][publishDate]`, book.publishDate || "");
-      data.set(`books[book${i}][isbn10]`, book.isbn10 || "");
-      data.set(`books[book${i}][isbn13]`, book.isbn13 || "");
-      data.set(`books[book${i}][category]`, book.category);
+    formData.books.forEach((book, index) => {
+      data.set(`books[${index}][name]`, book.name);
+      data.set(`books[${index}][writer]`, book.writer);
+      data.set(`books[${index}][language]`, book.language);
+      data.set(`books[${index}][publisher]`, book.publisher || "");
+      data.set(`books[${index}][publishDate]`, book.publishDate || "");
 
-      // Check both demoPdfFile and demoPdf (for existing files)
+      data.set(`books[${index}][isbn13]`, book.isbn13 || "");
+      data.set(`books[${index}][category]`, book.category);
+
       if (book.demoPdfFile) {
-        data.append(`books[book${i}][demoPdf]`, book.demoPdfFile);
-      } else if (
-        typeof book.demoPdf === "string" &&
-        book.demoPdf.includes("http")
-      ) {
-        // If it's an existing URL, send it as a string
-        data.set(`books[book${i}][demoPdf]`, book.demoPdf);
+        data.append(`books[${index}][demoPdf]`, book.demoPdfFile);
       }
-    }
+    });
 
     // Images
     if (image) data.append("image", image);
@@ -147,9 +159,9 @@ const NewPackage = () => {
       data.append("images", img);
     });
 
-    // Use updatePackage instead of createPackage
     dispatch(createPackage(data));
   };
+
   const handleFileChange = (e, setFile, setPreview) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -164,30 +176,36 @@ const NewPackage = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleBookFileChange = (e, bookNumber) => {
+  const handleBookFileChange = (e, bookIndex) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    const updatedBooks = [...formData.books];
+
+    // Clean up previous preview URL if exists
+    if (updatedBooks[bookIndex].demoPdfPreview) {
+      URL.revokeObjectURL(updatedBooks[bookIndex].demoPdfPreview);
+    }
+
+    updatedBooks[bookIndex] = {
+      ...updatedBooks[bookIndex],
+      demoPdfFile: file,
+      demoPdfPreview: URL.createObjectURL(file),
+    };
+
     setFormData({
       ...formData,
-      books: {
-        ...formData.books,
-        [`book${bookNumber}`]: {
-          ...formData.books[`book${bookNumber}`],
-          demoPdf: URL.createObjectURL(file),
-          demoPdfFile: file,
-          // Clear any existing PDF URL if a new file is uploaded
-          ...(formData.books[`book${bookNumber}`].demoPdf &&
-          typeof formData.books[`book${bookNumber}`].demoPdf === "string"
-            ? { demoPdf: null }
-            : {}),
-        },
-      },
+      books: updatedBooks,
     });
   };
 
   const handleImagesChange = (e) => {
     const files = Array.from(e.target.files);
+
+    if (imagesPreview.length + files.length > 4) {
+      toast.warning("Maximum 4 additional images allowed");
+      return;
+    }
 
     files.forEach((file) => {
       const reader = new FileReader();
@@ -206,17 +224,22 @@ const NewPackage = () => {
     setPreview(null);
   };
 
-  const removeBookFile = (bookNumber) => {
+  const removeBookFile = (bookIndex) => {
+    const updatedBooks = [...formData.books];
+
+    if (updatedBooks[bookIndex].demoPdfPreview) {
+      URL.revokeObjectURL(updatedBooks[bookIndex].demoPdfPreview);
+    }
+
+    updatedBooks[bookIndex] = {
+      ...updatedBooks[bookIndex],
+      demoPdfFile: null,
+      demoPdfPreview: null,
+    };
+
     setFormData({
       ...formData,
-      books: {
-        ...formData.books,
-        [`book${bookNumber}`]: {
-          ...formData.books[`book${bookNumber}`],
-          demoPdf: null,
-          demoPdfFile: null,
-        },
-      },
+      books: updatedBooks,
     });
   };
 
@@ -230,11 +253,33 @@ const NewPackage = () => {
     setImages(newImages);
   };
 
-  const renderBookTab = (bookNumber) => {
-    const book = formData.books[`book${bookNumber}`];
+  useEffect(() => {
+    return () => {
+      // Clean up all object URLs when component unmounts
+      formData.books.forEach((book) => {
+        if (book.demoPdfPreview) {
+          URL.revokeObjectURL(book.demoPdfPreview);
+        }
+      });
+    };
+  }, [formData.books]);
+
+  const renderBookTab = (bookIndex) => {
+    const book = formData.books[bookIndex];
 
     return (
-      <div className="bg-gray-50 p-4 rounded-lg">
+      <div className="bg-gray-50 p-4 rounded-lg relative">
+        {formData.books.length > 1 && (
+          <button
+            type="button"
+            onClick={() => removeBook(bookIndex)}
+            className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+            title="Remove this book"
+          >
+            <FiTrash2 size={18} />
+          </button>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -246,7 +291,7 @@ const NewPackage = () => {
               placeholder="Enter book name"
               required
               value={book.name}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
+              onChange={(e) => handleBookInputChange(e, bookIndex)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           </div>
@@ -261,7 +306,7 @@ const NewPackage = () => {
               placeholder="Enter writer name"
               required
               value={book.writer}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
+              onChange={(e) => handleBookInputChange(e, bookIndex)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           </div>
@@ -274,7 +319,7 @@ const NewPackage = () => {
               name="category"
               required
               value={book.category}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
+              onChange={(e) => handleBookInputChange(e, bookIndex)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
               <option value="">-- Select Category --</option>
@@ -296,7 +341,7 @@ const NewPackage = () => {
               placeholder="Enter language"
               required
               value={book.language}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
+              onChange={(e) => handleBookInputChange(e, bookIndex)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           </div>
@@ -310,7 +355,7 @@ const NewPackage = () => {
               name="publisher"
               placeholder="Enter publisher name"
               value={book.publisher}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
+              onChange={(e) => handleBookInputChange(e, bookIndex)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           </div>
@@ -323,21 +368,7 @@ const NewPackage = () => {
               type="date"
               name="publishDate"
               value={book.publishDate}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              ISBN-10
-            </label>
-            <input
-              type="text"
-              name="isbn10"
-              placeholder="Enter ISBN-10"
-              value={book.isbn10}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
+              onChange={(e) => handleBookInputChange(e, bookIndex)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           </div>
@@ -351,12 +382,11 @@ const NewPackage = () => {
               name="isbn13"
               placeholder="Enter ISBN-13"
               value={book.isbn13}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
+              onChange={(e) => handleBookInputChange(e, bookIndex)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           </div>
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Demo PDF
@@ -365,23 +395,23 @@ const NewPackage = () => {
             <label className="flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-indigo-500 transition-colors">
               <FiUpload className="text-gray-400 mb-2" size={24} />
               <span className="text-sm text-gray-500 text-center">
-                {book.demoPdf ? "Change PDF" : "Upload Demo PDF"}
+                {book.demoPdfPreview ? "Change PDF" : "Upload Demo PDF"}
               </span>
               <input
                 type="file"
                 accept=".pdf"
-                onChange={(e) => handleBookFileChange(e, bookNumber)}
+                onChange={(e) => handleBookFileChange(e, bookIndex)}
                 className="hidden"
               />
             </label>
-            {book.demoPdf && (
+            {book.demoPdfPreview && (
               <div className="relative">
                 <div className="w-24 h-24 bg-gray-100 rounded-lg border flex items-center justify-center">
                   <span className="text-xs text-gray-500">PDF Preview</span>
                 </div>
                 <button
                   type="button"
-                  onClick={() => removeBookFile(bookNumber)}
+                  onClick={() => removeBookFile(bookIndex)}
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                 >
                   <FiX size={14} />
@@ -420,6 +450,20 @@ const NewPackage = () => {
                     placeholder="Enter package name"
                     required
                     value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Package Title <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    placeholder="Enter package title"
+                    required
+                    value={formData.title}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
@@ -512,29 +556,38 @@ const NewPackage = () => {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 ></textarea>
               </div>
+
               {/* Book tabs */}
               <div>
-                <div className="border-b border-gray-200 mb-4">
+                <div className="flex justify-between items-center border-b border-gray-200 mb-4">
                   <nav className="-mb-px flex space-x-8">
-                    {[1, 2, 3].map((tab) => (
+                    {formData.books.map((_, index) => (
                       <button
-                        key={tab}
+                        key={index}
                         onClick={(e) => {
                           e.preventDefault();
-                          setActiveBookTab(tab);
+                          setActiveBookTab(index);
                         }}
                         className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
-                          activeBookTab === tab
+                          activeBookTab === index
                             ? "border-indigo-500 text-indigo-600"
                             : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                         }`}
                       >
-                        Book {tab}
+                        Book {index + 1}
                       </button>
                     ))}
                   </nav>
+                  <button
+                    type="button"
+                    onClick={addNewBook}
+                    disabled={formData.books.length >= 20}
+                    className="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                  >
+                    <FiPlus size={16} /> Add Book
+                  </button>
                 </div>
-                {renderBookTab(activeBookTab)}
+                {formData.books.length > 0 && renderBookTab(activeBookTab)}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

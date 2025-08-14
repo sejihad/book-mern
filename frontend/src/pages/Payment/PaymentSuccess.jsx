@@ -9,7 +9,6 @@ const PaymentSuccess = () => {
 
   useEffect(() => {
     if (sessionId) {
-      console.log("Stripe Session ID:", sessionId);
       // You can add API call here to verify payment
       // Example: verifyPayment(sessionId);
     }

@@ -11,8 +11,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import slugify from "slugify";
+import { addItemsToCart } from "../../actions/cartAction";
 import { getPackages } from "../../actions/packageAction";
-import { addItemsPackageToCart } from "../../actions/packageCartAction";
 import Loader from "../../component/layout/Loader/Loader";
 import MetaData from "../../component/layout/MetaData";
 
@@ -55,7 +55,7 @@ const PackagesPage = () => {
   };
 
   const addToCartHandler = (id, q) => {
-    dispatch(addItemsPackageToCart(id, q));
+    dispatch(addItemsToCart("package", id, q));
     toast.success("Package Added To Cart");
   };
 

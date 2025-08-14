@@ -1,6 +1,8 @@
 const dotenv = require("dotenv");
 const Order = require("../models/orderModel");
 const User = require("../models/userModel");
+const Book = require("../models/bookModel");
+const Package = require("../models/packageModel");
 const paypal = require("@paypal/checkout-server-sdk");
 
 dotenv.config();
@@ -15,11 +17,62 @@ const environment = new paypal.core.SandboxEnvironment(
 // );
 const client = new paypal.core.PayPalHttpClient(environment);
 
+// Helper function to determine order type
+const determineOrderType = (orderItems) => {
+  const uniqueTypes = [...new Set(orderItems.map((item) => item.type))];
+  if (uniqueTypes.length === 1) {
+    return uniqueTypes[0]; // "ebook", "book", or "package"
+  }
+  return "mixed"; // multiple types in order
+};
+
+// Function to fetch complete item details
+const getItemDetails = async (items) => {
+  const detailedItems = await Promise.all(
+    items.map(async (item) => {
+      try {
+        if (item.type === "book" || item.type === "ebook") {
+          const book = await Book.findById(item.id).select(
+            "name discountPrice image type"
+          );
+          return {
+            id: item.id,
+            type: item.type,
+            quantity: item.quantity,
+            name: book?.name,
+            price: book?.discountPrice,
+            image: book?.image?.url,
+          };
+        } else if (item.type === "package") {
+          const package = await Package.findById(item.id).select(
+            "name discountPrice image type"
+          );
+          return {
+            id: item.id,
+            type: item.type,
+            quantity: item.quantity,
+            name: package?.name,
+            price: package?.discountPrice,
+            image: package?.image?.url,
+          };
+        }
+        return item; // fallback
+      } catch (error) {
+        return item; // return basic info if error occurs
+      }
+    })
+  );
+  return detailedItems;
+};
+
 // Create PayPal Checkout Session
 const createPaypalCheckoutSession = async (req, res, next) => {
   try {
     const { shippingInfo, orderItems, itemsPrice, shippingPrice, totalPrice } =
       req.body;
+
+    const orderType = determineOrderType(orderItems);
+    const isEbookOnly = orderType === "ebook";
 
     const request = new paypal.orders.OrdersCreateRequest();
     request.prefer("return=representation");
@@ -30,6 +83,16 @@ const createPaypalCheckoutSession = async (req, res, next) => {
           amount: {
             currency_code: "USD",
             value: Number(totalPrice).toFixed(2),
+            breakdown: {
+              item_total: {
+                currency_code: "USD",
+                value: Number(itemsPrice).toFixed(2),
+              },
+              shipping: {
+                currency_code: "USD",
+                value: isEbookOnly ? "0.00" : Number(shippingPrice).toFixed(2),
+              },
+            },
           },
           description: "Book Store Order Payment",
         },
@@ -40,18 +103,18 @@ const createPaypalCheckoutSession = async (req, res, next) => {
       },
     });
 
-    // store data in your DB or cache keyed by order ID for retrieval after payment
     const order = await client.execute(request);
 
-    // Save metadata temporarily (can also store in DB with orderId)
+    // Store complete metadata in your database or session
     req.session = req.session || {};
     req.session[order.result.id] = {
       userId: req.user._id.toString(),
-      shippingInfo,
-      orderItems,
-      itemsPrice,
-      shippingPrice,
-      totalPrice,
+      shippingInfo: isEbookOnly ? {} : shippingInfo,
+      orderItems: JSON.stringify(orderItems), // Store minimal items
+      itemsPrice: itemsPrice.toString(),
+      shippingPrice: isEbookOnly ? "0" : shippingPrice.toString(),
+      totalPrice: totalPrice.toString(),
+      orderType: orderType,
     };
 
     res.status(200).json({ id: order.result.id });
@@ -89,6 +152,7 @@ const capturePaypalOrder = async (req, res) => {
       itemsPrice,
       shippingPrice,
       totalPrice,
+      orderType,
     } = metadata;
 
     const user = await User.findById(userId);
@@ -102,9 +166,13 @@ const capturePaypalOrder = async (req, res) => {
       return res.status(200).json({ message: "Order already exists" });
     }
 
-    const itemTypes = [...new Set(orderItems.map((item) => item.type))];
-    const order_type = itemTypes[0];
-    const isEbookOnly = order_type === "ebook";
+    // Parse session metadata
+    const minimalOrderItems = JSON.parse(orderItems);
+    const parsedShippingInfo = JSON.parse(shippingInfo);
+    const isEbookOnly = orderType === "ebook";
+
+    // Fetch complete item details from appropriate models
+    const completeOrderItems = await getItemDetails(minimalOrderItems);
 
     const newOrder = new Order({
       user: {
@@ -114,21 +182,27 @@ const capturePaypalOrder = async (req, res) => {
         number: user.number || "",
         country: user.country || "",
       },
-      shippingInfo: isEbookOnly ? {} : shippingInfo,
-      orderItems,
-      itemsPrice,
-      shippingPrice: isEbookOnly ? 0 : shippingPrice,
-      totalPrice,
+      shippingInfo: isEbookOnly ? {} : parsedShippingInfo,
+      orderItems: completeOrderItems,
+      itemsPrice: Number(itemsPrice),
+      shippingPrice: isEbookOnly ? 0 : Number(shippingPrice),
+      totalPrice: Number(totalPrice),
       payment: {
         method: "paypal",
         transactionId,
         status: "paid",
       },
-      order_type,
+      order_type: orderType,
       order_status: isEbookOnly ? "completed" : "pending",
     });
 
     await newOrder.save();
+
+    // Clean up session data
+    if (req.session) {
+      delete req.session[orderID];
+    }
+
     res.status(200).json({ message: "✅ PayPal order saved successfully" });
   } catch (err) {
     console.error("❌ PayPal capture error:", err);

@@ -14,7 +14,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
   clearErrors,
-  getOrderDetails,
+  getAdminOrderDetails,
   updateOrder,
 } from "../../actions/orderAction";
 import Loader from "../../component/layout/Loader/Loader";
@@ -31,7 +31,7 @@ const AdminOrderDetails = () => {
   const { isUpdated, error: updateError } = useSelector((state) => state.order);
 
   useEffect(() => {
-    dispatch(getOrderDetails(id));
+    dispatch(getAdminOrderDetails(id));
   }, [dispatch, id]);
 
   useEffect(() => {
@@ -155,9 +155,10 @@ const AdminOrderDetails = () => {
 
     // Order items table
     autoTable(doc, {
-      head: [["Product", "Price", "Qty", "Subtotal"]],
+      head: [["Product", "Type", "Price", "Qty", "Subtotal"]],
       body: order.orderItems.map((item) => [
         item.name,
+        item.type, // Add type column
         `$${item.price.toFixed(2)}`,
         item.quantity,
         `$${(item.price * item.quantity).toFixed(2)}`,
@@ -172,6 +173,9 @@ const AdminOrderDetails = () => {
       },
       alternateRowStyles: {
         fillColor: [245, 245, 245],
+      },
+      columnStyles: {
+        1: { cellWidth: 20 }, // Adjust width for type column
       },
     });
 
@@ -412,10 +416,14 @@ const AdminOrderDetails = () => {
             </h3>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
+                {/* Order Items Table */}
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Product
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Type
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Price
@@ -449,6 +457,20 @@ const AdminOrderDetails = () => {
                             </div>
                           </div>
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 py-1 text-xs font-semibold rounded-full 
+    ${
+      item.type === "ebook"
+        ? "bg-purple-100 text-purple-800"
+        : item.type === "book"
+        ? "bg-blue-100 text-blue-800"
+        : "bg-orange-100 text-orange-800"
+    }`}
+                        >
+                          {item.type}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         ${item.price?.toFixed(2)}

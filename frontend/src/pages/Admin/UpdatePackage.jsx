@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FiEdit2, FiUpload, FiX } from "react-icons/fi";
+import { FiEdit2, FiPlus, FiTrash2, FiUpload, FiX } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -22,56 +22,36 @@ const UpdatePackage = () => {
   const { loading, error, isUpdated } = useSelector((state) => state.package);
   const { categories } = useSelector((state) => state.categories);
 
+  const initialBookData = {
+    name: "",
+    writer: "",
+    language: "",
+    publisher: "",
+    publishDate: "",
+
+    isbn13: "",
+    category: "",
+    demoPdf: null,
+    demoPdfFile: null,
+  };
+
   const [formData, setFormData] = useState({
     name: "",
+    title: "",
     description: "",
     oldPrice: "",
     discountPrice: "",
     deliveryTime: "",
     deliverToCountries: "",
     videoLink: "",
-    books: {
-      book1: {
-        name: "",
-        writer: "",
-        language: "",
-        publisher: "",
-        publishDate: "",
-        isbn10: "",
-        isbn13: "",
-        category: "",
-        demoPdf: null,
-      },
-      book2: {
-        name: "",
-        writer: "",
-        language: "",
-        publisher: "",
-        publishDate: "",
-        isbn10: "",
-        isbn13: "",
-        category: "",
-        demoPdf: null,
-      },
-      book3: {
-        name: "",
-        writer: "",
-        language: "",
-        publisher: "",
-        publishDate: "",
-        isbn10: "",
-        isbn13: "",
-        category: "",
-        demoPdf: null,
-      },
-    },
+    books: [JSON.parse(JSON.stringify(initialBookData))],
   });
 
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [images, setImages] = useState([]);
   const [imagesPreview, setImagesPreview] = useState([]);
-  const [activeBookTab, setActiveBookTab] = useState(1);
+  const [activeBookTab, setActiveBookTab] = useState(0);
 
   useEffect(() => {
     dispatch(getCategory());
@@ -79,32 +59,23 @@ const UpdatePackage = () => {
     if (!pkg || pkg._id !== id) {
       dispatch(getAdminPackageDetails(id));
     } else {
+      // Initialize form with package data
       setFormData({
         name: pkg.name,
+        title: pkg.title,
         description: pkg.description,
         oldPrice: pkg.oldPrice,
         discountPrice: pkg.discountPrice,
         deliveryTime: pkg.deliveryTime || "",
         deliverToCountries: pkg.deliverToCountries || "",
         videoLink: pkg.videoLink || "",
-        books: {
-          book1: {
-            ...pkg.books.book1,
-            demoPdf: pkg.books.book1.demoPdf?.url || null,
-            demoPdfFile: null,
-          },
-          book2: {
-            ...pkg.books.book2,
-            demoPdf: pkg.books.book2.demoPdf?.url || null,
-            demoPdfFile: null,
-          },
-          book3: {
-            ...pkg.books.book3,
-            demoPdf: pkg.books.book3.demoPdf?.url || null,
-            demoPdfFile: null,
-          },
-        },
+        books: pkg.books.map((book) => ({
+          ...book,
+          demoPdf: book.demoPdf?.url || null,
+          demoPdfFile: null,
+        })) || [JSON.parse(JSON.stringify(initialBookData))],
       });
+
       if (pkg.image) setImagePreview(pkg.image.url);
       if (pkg.images) setImagesPreview(pkg.images.map((img) => img.url));
     }
@@ -115,7 +86,7 @@ const UpdatePackage = () => {
     }
 
     if (isUpdated) {
-      toast.success("Package updated");
+      toast.success("Package updated successfully");
       dispatch({ type: UPDATE_PACKAGE_RESET });
       navigate("/admin/packages");
     }
@@ -129,26 +100,61 @@ const UpdatePackage = () => {
     });
   };
 
-  const handleBookInputChange = (e, bookNumber) => {
+  const handleBookInputChange = (e, bookIndex) => {
     const { name, value } = e.target;
+    const updatedBooks = [...formData.books];
+    updatedBooks[bookIndex] = {
+      ...updatedBooks[bookIndex],
+      [name]: value,
+    };
     setFormData({
       ...formData,
-      books: {
-        ...formData.books,
-        [`book${bookNumber}`]: {
-          ...formData.books[`book${bookNumber}`],
-          [name]: value,
-        },
-      },
+      books: updatedBooks,
     });
+  };
+
+  const addNewBook = () => {
+    if (formData.books.length >= 20) {
+      toast.warning("Maximum 20 books allowed per package");
+      return;
+    }
+    setFormData({
+      ...formData,
+      books: [...formData.books, JSON.parse(JSON.stringify(initialBookData))],
+    });
+    setActiveBookTab(formData.books.length);
+  };
+
+  const removeBook = (index) => {
+    if (formData.books.length <= 1) {
+      toast.warning("At least one book is required");
+      return;
+    }
+
+    const updatedBooks = formData.books.filter((_, i) => i !== index);
+    setFormData({
+      ...formData,
+      books: updatedBooks,
+    });
+
+    if (activeBookTab >= updatedBooks.length) {
+      setActiveBookTab(updatedBooks.length - 1);
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (formData.books.length < 1) {
+      toast.error("Please add at least one book");
+      return;
+    }
+
     const data = new FormData();
 
     // Package data
     data.set("name", formData.name);
+    data.set("title", formData.title);
     data.set("description", formData.description);
     data.set("oldPrice", formData.oldPrice);
     data.set("discountPrice", formData.discountPrice);
@@ -157,32 +163,25 @@ const UpdatePackage = () => {
     if (formData.videoLink) data.set("videoLink", formData.videoLink);
 
     // Books data
-    for (let i = 1; i <= 3; i++) {
-      const book = formData.books[`book${i}`];
+    formData.books.forEach((book, index) => {
+      data.set(`books[${index}][name]`, book.name);
+      data.set(`books[${index}][writer]`, book.writer);
+      data.set(`books[${index}][language]`, book.language);
+      data.set(`books[${index}][publisher]`, book.publisher || "");
+      data.set(`books[${index}][publishDate]`, book.publishDate || "");
 
-      data.set(`books[book${i}][name]`, book.name);
-      data.set(`books[book${i}][writer]`, book.writer);
-      data.set(`books[book${i}][language]`, book.language);
-      data.set(`books[book${i}][publisher]`, book.publisher || "");
-      data.set(`books[book${i}][publishDate]`, book.publishDate || "");
-      data.set(`books[book${i}][isbn10]`, book.isbn10 || "");
-      data.set(`books[book${i}][isbn13]`, book.isbn13 || "");
-      data.set(`books[book${i}][category]`, book.category);
+      data.set(`books[${index}][isbn13]`, book.isbn13 || "");
+      data.set(`books[${index}][category]`, book.category);
 
-      // যদি নতুন ফাইল থাকে, তাহলে ফাইল হিসেবে পাঠাও
       if (book.demoPdfFile) {
-        data.append(`books[book${i}][demoPdf]`, book.demoPdfFile);
+        data.append(`books[${index}][demoPdf]`, book.demoPdfFile);
       } else if (
         typeof book.demoPdf === "string" &&
-        book.demoPdf.startsWith("http")
+        book.demoPdf.includes("http")
       ) {
-        // যদি পুরানো ফাইলের URL থাকে, সেটা string হিসেবে পাঠাও (backend handle করবে)
-        data.set(`books[book${i}][demoPdf]`, book.demoPdf);
-      } else {
-        // কোনো ফাইল নেই, NULL বা empty সেট করতে চাইলে এখানে handle করতে পারেন
-        data.set(`books[book${i}][demoPdf]`, "");
+        data.set(`books[${index}][demoPdf]`, book.demoPdf);
       }
-    }
+    });
 
     // Images
     if (image) data.append("image", image);
@@ -190,9 +189,9 @@ const UpdatePackage = () => {
       data.append("images", img);
     });
 
-    // Use updatePackage instead of createPackage
     dispatch(updatePackage(id, data));
   };
+
   const handleFileChange = (e, setFile, setPreview) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -207,25 +206,30 @@ const UpdatePackage = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleBookFileChange = (e, bookNumber) => {
+  const handleBookFileChange = (e, bookIndex) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    setFormData((prev) => ({
-      ...prev,
-      books: {
-        ...prev.books,
-        [`book${bookNumber}`]: {
-          ...prev.books[`book${bookNumber}`],
-          demoPdfFile: file, // ফাইল আপলোডের জন্য
-          demoPdf: URL.createObjectURL(file), // preview
-        },
-      },
-    }));
+    const updatedBooks = [...formData.books];
+    updatedBooks[bookIndex] = {
+      ...updatedBooks[bookIndex],
+      demoPdfFile: file,
+      demoPdf: URL.createObjectURL(file),
+    };
+
+    setFormData({
+      ...formData,
+      books: updatedBooks,
+    });
   };
 
   const handleImagesChange = (e) => {
     const files = Array.from(e.target.files);
+
+    if (imagesPreview.length + files.length > 4) {
+      toast.warning("Maximum 4 additional images allowed");
+      return;
+    }
 
     files.forEach((file) => {
       const reader = new FileReader();
@@ -244,19 +248,20 @@ const UpdatePackage = () => {
     setPreview(null);
   };
 
-  const removeBookFile = (bookNumber) => {
+  const removeBookFile = (bookIndex) => {
+    const updatedBooks = [...formData.books];
+    updatedBooks[bookIndex] = {
+      ...updatedBooks[bookIndex],
+      demoPdf: null,
+      demoPdfFile: null,
+    };
+
     setFormData({
       ...formData,
-      books: {
-        ...formData.books,
-        [`book${bookNumber}`]: {
-          ...formData.books[`book${bookNumber}`],
-          demoPdf: null,
-          demoPdfFile: null,
-        },
-      },
+      books: updatedBooks,
     });
   };
+
   const removeImage = (index) => {
     const newImagesPreview = [...imagesPreview];
     newImagesPreview.splice(index, 1);
@@ -267,11 +272,33 @@ const UpdatePackage = () => {
     setImages(newImages);
   };
 
-  const renderBookTab = (bookNumber) => {
-    const book = formData.books[`book${bookNumber}`];
+  useEffect(() => {
+    return () => {
+      // Clean up all object URLs when component unmounts
+      formData.books.forEach((book) => {
+        if (book.demoPdf && typeof book.demoPdf === "string") {
+          URL.revokeObjectURL(book.demoPdf);
+        }
+      });
+    };
+  }, [formData.books]);
+
+  const renderBookTab = (bookIndex) => {
+    const book = formData.books[bookIndex];
 
     return (
-      <div className="bg-gray-50 p-4 rounded-lg">
+      <div className="bg-gray-50 p-4 rounded-lg relative">
+        {formData.books.length > 1 && (
+          <button
+            type="button"
+            onClick={() => removeBook(bookIndex)}
+            className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+            title="Remove this book"
+          >
+            <FiTrash2 size={18} />
+          </button>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -283,7 +310,7 @@ const UpdatePackage = () => {
               placeholder="Enter book name"
               required
               value={book.name}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
+              onChange={(e) => handleBookInputChange(e, bookIndex)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
@@ -298,7 +325,7 @@ const UpdatePackage = () => {
               placeholder="Enter writer name"
               required
               value={book.writer}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
+              onChange={(e) => handleBookInputChange(e, bookIndex)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
@@ -311,7 +338,7 @@ const UpdatePackage = () => {
               name="category"
               required
               value={book.category}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
+              onChange={(e) => handleBookInputChange(e, bookIndex)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
               <option value="">-- Select Category --</option>
@@ -333,7 +360,7 @@ const UpdatePackage = () => {
               placeholder="Enter language"
               required
               value={book.language}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
+              onChange={(e) => handleBookInputChange(e, bookIndex)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
@@ -347,7 +374,7 @@ const UpdatePackage = () => {
               name="publisher"
               placeholder="Enter publisher name"
               value={book.publisher}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
+              onChange={(e) => handleBookInputChange(e, bookIndex)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
@@ -360,21 +387,7 @@ const UpdatePackage = () => {
               type="date"
               name="publishDate"
               value={book.publishDate}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              ISBN-10
-            </label>
-            <input
-              type="text"
-              name="isbn10"
-              placeholder="Enter ISBN-10"
-              value={book.isbn10}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
+              onChange={(e) => handleBookInputChange(e, bookIndex)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
@@ -388,7 +401,7 @@ const UpdatePackage = () => {
               name="isbn13"
               placeholder="Enter ISBN-13"
               value={book.isbn13}
-              onChange={(e) => handleBookInputChange(e, bookNumber)}
+              onChange={(e) => handleBookInputChange(e, bookIndex)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
@@ -407,7 +420,7 @@ const UpdatePackage = () => {
               <input
                 type="file"
                 accept=".pdf"
-                onChange={(e) => handleBookFileChange(e, bookNumber)}
+                onChange={(e) => handleBookFileChange(e, bookIndex)}
                 className="hidden"
               />
             </label>
@@ -418,7 +431,7 @@ const UpdatePackage = () => {
                 </div>
                 <button
                   type="button"
-                  onClick={() => removeBookFile(bookNumber)}
+                  onClick={() => removeBookFile(bookIndex)}
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                 >
                   <FiX size={14} />
@@ -430,6 +443,7 @@ const UpdatePackage = () => {
       </div>
     );
   };
+
   return (
     <div className="min-h-screen container bg-gray-50">
       <MetaData title="Update Package" />
@@ -454,6 +468,20 @@ const UpdatePackage = () => {
                     placeholder="Enter package name"
                     required
                     value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Package Title <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    placeholder="Enter package title"
+                    required
+                    value={formData.title}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
@@ -546,29 +574,38 @@ const UpdatePackage = () => {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 ></textarea>
               </div>
+
               {/* Book tabs */}
               <div>
-                <div className="border-b border-gray-200 mb-4">
-                  <nav className="-mb-px flex space-x-8">
-                    {[1, 2, 3].map((tab) => (
+                <div className="flex justify-between items-center border-b border-gray-200 mb-4">
+                  <nav className="-mb-px flex space-x-4 overflow-x-auto">
+                    {formData.books.map((_, index) => (
                       <button
-                        key={tab}
+                        key={index}
                         onClick={(e) => {
                           e.preventDefault();
-                          setActiveBookTab(tab);
+                          setActiveBookTab(index);
                         }}
-                        className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
-                          activeBookTab === tab
+                        className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                          activeBookTab === index
                             ? "border-green-500 text-green-600"
                             : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                         }`}
                       >
-                        Book {tab}
+                        Book {index + 1}
                       </button>
                     ))}
                   </nav>
+                  <button
+                    type="button"
+                    onClick={addNewBook}
+                    disabled={formData.books.length >= 20}
+                    className="flex items-center gap-1 text-green-600 hover:text-green-800 text-sm font-medium"
+                  >
+                    <FiPlus size={16} /> Add Book
+                  </button>
                 </div>
-                {renderBookTab(activeBookTab)}
+                {formData.books.length > 0 && renderBookTab(activeBookTab)}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -651,6 +688,7 @@ const UpdatePackage = () => {
                   </div>
                 </div>
               </div>
+
               <button
                 type="submit"
                 disabled={loading}

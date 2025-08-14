@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
 import { paypalOrderCreate } from "../../actions/paypalAction";
 import { getShips } from "../../actions/shipAction";
 import { stripeOrderCreate } from "../../actions/stripeAction";
@@ -15,25 +14,30 @@ const Checkout = () => {
   const location = useLocation();
 
   // Safely get location state with defaults
-  const { cartItems = [], type = "" } = location.state || {};
-
-  const isEbook = type === "ebook";
+  const { cartItems = [] } = location.state || {};
 
   const { user, isAuthenticated } = useSelector((state) => state.user);
   const { ships } = useSelector((state) => state.ships);
 
-  // Calculate total price safely
+  // Determine order type
+  const determineOrderType = () => {
+    const uniqueTypes = [...new Set(cartItems.map((item) => item.type))];
+    return uniqueTypes.length === 1 ? uniqueTypes[0] : "mixed";
+  };
+
+  const orderType = determineOrderType();
+  const isEbookOnly = orderType === "ebook";
+  const requiresShipping = !isEbookOnly;
+
+  // Calculate total price
   const totalPrice = cartItems.reduce((acc, item) => {
-    const price = item?.price;
-    const quantity = item?.quantity;
-    return acc + price * quantity;
+    return acc + item.price * item.quantity;
   }, 0);
 
-  // Shipping state with all required fields
+  // Shipping state
   const [shippingInfo, setShippingInfo] = useState(
-    isEbook
-      ? {}
-      : {
+    requiresShipping
+      ? {
           address: "",
           city: "",
           state: "",
@@ -41,17 +45,19 @@ const Checkout = () => {
           pinCode: "",
           phone: "",
         }
+      : {}
   );
 
   const [selectedCountry, setSelectedCountry] = useState("");
-  const [shippingCharge, setShippingCharge] = useState(isEbook ? 0 : 0);
-  const [isShippingAvailable, setIsShippingAvailable] = useState(!isEbook);
-  const [isFormComplete, setIsFormComplete] = useState(isEbook);
+  const [shippingCharge, setShippingCharge] = useState(0);
+  const [isShippingAvailable, setIsShippingAvailable] =
+    useState(requiresShipping);
+  const [isFormComplete, setIsFormComplete] = useState(!requiresShipping);
   const [isLoading, setIsLoading] = useState(true);
 
   // Check if all required fields are filled
   useEffect(() => {
-    if (isEbook) {
+    if (!requiresShipping) {
       setIsFormComplete(true);
       return;
     }
@@ -68,11 +74,11 @@ const Checkout = () => {
       requiredFields.every((field) => field && field.trim() !== "") &&
         isShippingAvailable
     );
-  }, [shippingInfo, isShippingAvailable, isEbook]);
+  }, [shippingInfo, isShippingAvailable, requiresShipping]);
 
-  // Load shipping data on mount (only if not ebook)
+  // Load shipping data on mount (only if shipping required)
   useEffect(() => {
-    if (isEbook) {
+    if (!requiresShipping) {
       setIsLoading(false);
       return;
     }
@@ -87,7 +93,9 @@ const Checkout = () => {
       }
     };
     loadData();
-  }, [dispatch, isEbook]);
+  }, [dispatch, requiresShipping]);
+
+  // Auth check
   useEffect(() => {
     if (!isAuthenticated) {
       toast.info("Please login to proceed with checkout");
@@ -95,14 +103,15 @@ const Checkout = () => {
       return;
     }
 
-    if (!user?.country || !user?.number) {
+    if (requiresShipping && (!user?.country || !user?.number)) {
       toast.info("Complete Your Profile");
       navigate("/profile/update");
     }
-  }, [isAuthenticated, user, navigate, location.pathname]);
-  // Handle country change (only if not ebook)
+  }, [isAuthenticated, user, navigate, location.pathname, requiresShipping]);
+
+  // Handle country change (only if shipping required)
   useEffect(() => {
-    if (isEbook || !selectedCountry) return;
+    if (!requiresShipping || !selectedCountry) return;
 
     try {
       const countryData = Country.getCountryByCode(selectedCountry);
@@ -124,68 +133,44 @@ const Checkout = () => {
       console.error("Country data error:", error);
       toast.error("Error loading country data");
     }
-  }, [selectedCountry, ships, isEbook]);
+  }, [selectedCountry, ships, requiresShipping]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setShippingInfo((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleStripePayment = async (e) => {
+  const handlePayment = async (e, paymentMethod) => {
     e.preventDefault();
 
-    // Validate form completion (only if not ebook)
-    if (!isEbook && !isFormComplete) {
+    // Validate form completion (only if shipping required)
+    if (requiresShipping && !isFormComplete) {
       toast.error("Please fill all shipping fields correctly");
       return;
     }
 
+    // Prepare order items with only required fields
+    const orderItems = cartItems.map((item) => ({
+      id: item.id,
+      type: item.type,
+      quantity: item.quantity,
+    }));
+
     const orderData = {
-      shippingInfo: isEbook ? {} : shippingInfo,
-      orderItems: cartItems.map((item) => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        image: item.image,
-        quantity: item.quantity,
-        type: item.type,
-      })),
+      shippingInfo: requiresShipping ? shippingInfo : {},
+      orderItems,
       itemsPrice: totalPrice,
-      shippingPrice: isEbook ? 0 : shippingCharge,
-      totalPrice: isEbook ? totalPrice : totalPrice + shippingCharge,
-      paymentMethod: "stripe",
+      shippingPrice: requiresShipping ? shippingCharge : 0,
+      totalPrice: requiresShipping ? totalPrice + shippingCharge : totalPrice,
+      paymentMethod,
     };
 
-    // Call Stripe API
-    dispatch(stripeOrderCreate(orderData));
-  };
-
-  const handlePaypalPayment = async (e) => {
-    e.preventDefault();
-
-    // Validate form completion (only if not ebook)
-    if (!isEbook && !isFormComplete) {
-      toast.error("Please fill all shipping fields correctly");
-      return;
+    // Dispatch appropriate payment action
+    if (paymentMethod === "stripe") {
+      dispatch(stripeOrderCreate(orderData));
+    } else {
+      dispatch(paypalOrderCreate(orderData));
     }
-    const orderData = {
-      shippingInfo: isEbook ? {} : shippingInfo,
-      orderItems: cartItems.map((item) => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        image: item.image,
-        quantity: item.quantity,
-        type: item.type,
-      })),
-      itemsPrice: totalPrice,
-      shippingPrice: isEbook ? 0 : shippingCharge,
-      totalPrice: isEbook ? totalPrice : totalPrice + shippingCharge,
-      paymentMethod: "paypal",
-    };
-
-    // Call Stripe API
-    dispatch(paypalOrderCreate(orderData));
   };
 
   if (isLoading) {
@@ -211,12 +196,12 @@ const Checkout = () => {
       <MetaData title="Checkout" />
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <h2 className="text-2xl font-semibold mb-6 text-center">
-          {isEbook ? "Complete Your Purchase" : "Shipping Details"}
+          {isEbookOnly ? "Complete Your Purchase" : "Shipping & Payment"}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Shipping Form - Hidden for ebooks */}
-          {!isEbook && (
+          {/* Shipping Form - Only shown when shipping required */}
+          {requiresShipping && (
             <div className="md:col-span-2 bg-white rounded shadow-md p-6">
               <form>
                 <div className="mb-4">
@@ -309,8 +294,8 @@ const Checkout = () => {
             </div>
           )}
 
-          {/* Payment buttons - shown for both ebook and physical products */}
-          <div className={`${isEbook ? "md:col-span-3" : ""}`}>
+          {/* Payment buttons */}
+          <div className={`${!requiresShipping ? "md:col-span-3" : ""}`}>
             <div className="mt-6 p-6 bg-white shadow-md rounded-lg border border-gray-200">
               <h2 className="text-xl font-semibold mb-4 text-gray-800 text-center">
                 Choose Payment Method
@@ -318,7 +303,7 @@ const Checkout = () => {
 
               <div className="flex flex-col space-y-4">
                 <button
-                  onClick={(e) => handleStripePayment(e)}
+                  onClick={(e) => handlePayment(e, "stripe")}
                   disabled={!isFormComplete}
                   className={`w-full py-3 px-4 rounded-md text-lg font-medium transition-all duration-300 ${
                     isFormComplete
@@ -330,7 +315,7 @@ const Checkout = () => {
                 </button>
 
                 <button
-                  onClick={handlePaypalPayment}
+                  onClick={(e) => handlePayment(e, "paypal")}
                   disabled={!isFormComplete}
                   className={`w-full py-3 px-4 rounded-md text-lg font-medium transition-all duration-300 ${
                     isFormComplete
@@ -347,24 +332,22 @@ const Checkout = () => {
           {/* Order Summary */}
           <div className="bg-white rounded shadow-md p-6 h-fit">
             <h3 className="text-xl font-semibold mb-4">Order Summary</h3>
+            <p className="text-sm text-gray-600 mb-2">
+              Order Type: {orderType}
+            </p>
 
             <div className="divide-y">
-              {cartItems.map((item, i) => {
-                const price = item.discountPrice || item.price;
-                const subtotal = price * item.quantity;
-
-                return (
-                  <div key={i} className="py-3 flex justify-between">
-                    <div>
-                      <p className="font-medium">{item.name}</p>
-                      <p className="text-sm text-gray-600">
-                        {item.quantity} x ${price.toFixed(2)}
-                      </p>
-                    </div>
-                    <p>${subtotal.toFixed(2)}</p>
+              {cartItems.map((item, i) => (
+                <div key={i} className="py-3 flex justify-between">
+                  <div>
+                    <p className="font-medium">{item.name || item.title}</p>
+                    <p className="text-sm text-gray-600">
+                      {item.quantity} × ${item.price.toFixed(2)} ({item.type})
+                    </p>
                   </div>
-                );
-              })}
+                  <p>${(item.price * item.quantity).toFixed(2)}</p>
+                </div>
+              ))}
             </div>
 
             <div className="mt-4 space-y-2">
@@ -372,7 +355,7 @@ const Checkout = () => {
                 <span>Subtotal:</span>
                 <span>${totalPrice.toFixed(2)}</span>
               </div>
-              {!isEbook && (
+              {requiresShipping && (
                 <>
                   <div className="flex justify-between">
                     <span>Shipping:</span>
@@ -387,11 +370,11 @@ const Checkout = () => {
               <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
                 <span>Total:</span>
                 <span>
-                  {isEbook
-                    ? `$${totalPrice.toFixed(2)}`
-                    : isShippingAvailable
-                    ? `$${(totalPrice + shippingCharge).toFixed(2)}`
-                    : "N/A"}
+                  {requiresShipping
+                    ? isShippingAvailable
+                      ? `$${(totalPrice + shippingCharge).toFixed(2)}`
+                      : "N/A"
+                    : `$${totalPrice.toFixed(2)}`}
                 </span>
               </div>
             </div>

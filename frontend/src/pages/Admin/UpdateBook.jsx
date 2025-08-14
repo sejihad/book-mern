@@ -24,6 +24,7 @@ const UpdateBook = () => {
 
   const [formData, setFormData] = useState({
     name: "",
+    title: "",
     description: "",
     writer: "",
     type: "book",
@@ -34,7 +35,7 @@ const UpdateBook = () => {
     publishDate: "",
     deliveryTime: "",
     deliverToCountries: "",
-    isbn10: "",
+
     isbn13: "",
     category: "",
     videoLink: "",
@@ -55,6 +56,7 @@ const UpdateBook = () => {
     } else {
       setFormData({
         name: book.name,
+        title: book.title,
         description: book.description,
         writer: book.writer,
         type: book.type,
@@ -65,7 +67,7 @@ const UpdateBook = () => {
         publishDate: book.publishDate || "",
         deliveryTime: book.deliveryTime || "",
         deliverToCountries: book.deliverToCountries || "",
-        isbn10: book.isbn10 || "",
+
         isbn13: book.isbn13 || "",
         category: book.category,
         videoLink: book.videoLink || "",
@@ -102,6 +104,7 @@ const UpdateBook = () => {
     const data = new FormData();
 
     data.set("name", formData.name);
+    data.set("title", formData.title);
     data.set("description", formData.description);
     data.set("writer", formData.writer);
     data.set("type", formData.type);
@@ -112,7 +115,7 @@ const UpdateBook = () => {
     data.set("publishDate", formData.publishDate);
     data.set("deliveryTime", formData.deliveryTime);
     data.set("deliverToCountries", formData.deliverToCountries);
-    data.set("isbn10", formData.isbn10);
+
     data.set("isbn13", formData.isbn13);
     data.set("category", formData.category);
 
@@ -197,6 +200,20 @@ const UpdateBook = () => {
                     placeholder="Enter book name"
                     required
                     value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Book Title <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    placeholder="Enter book title"
+                    required
+                    value={formData.title}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
@@ -347,20 +364,6 @@ const UpdateBook = () => {
                     name="deliverToCountries"
                     placeholder="Country Name.."
                     value={formData.deliverToCountries}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    ISBN-10
-                  </label>
-                  <input
-                    type="text"
-                    name="isbn10"
-                    placeholder="Enter ISBN-10"
-                    value={formData.isbn10}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />

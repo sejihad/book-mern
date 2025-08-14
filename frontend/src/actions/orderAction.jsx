@@ -65,6 +65,30 @@ export const getOrderDetails = (id) => async (dispatch) => {
     });
   }
 };
+export const getAdminOrderDetails = (id) => async (dispatch) => {
+  try {
+    dispatch({ type: ORDER_DETAILS_REQUEST });
+
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const { data } = await axios.get(
+      `${API_URL}/api/v1/admin/order/${id}`,
+      config
+    );
+
+    dispatch({ type: ORDER_DETAILS_SUCCESS, payload: data.order });
+  } catch (error) {
+    dispatch({
+      type: ORDER_DETAILS_FAIL,
+      payload: error.response.data.message,
+    });
+  }
+};
 
 // Get All Orders (admin)
 export const getAllOrders = () => async (dispatch) => {

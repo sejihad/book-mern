@@ -13,8 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getBook, getBookDetails, newReview } from "../../actions/bookAction";
-import { addItemsBookToCart } from "../../actions/bookCartAction";
-import { addItemsEbookToCart } from "../../actions/ebookCartAction";
+import { addItemsToCart } from "../../actions/cartAction";
 import { myOrders } from "../../actions/orderAction";
 import BookSection from "../../component/BookSection";
 import Loader from "../../component/layout/Loader/Loader";
@@ -90,13 +89,13 @@ const BookDetails = () => {
   }, [dispatch, slug, reviewSuccess]);
 
   const addToCartBookHandler = () => {
-    dispatch(addItemsBookToCart(book._id, quantity));
-    navigate("/book/cart");
+    dispatch(addItemsToCart("book", book._id, quantity));
+    navigate("/cart");
     toast.success("Item Added To Cart");
   };
   const addToCartEbookHandler = () => {
-    dispatch(addItemsEbookToCart(book._id, 1));
-    navigate("/ebook/cart");
+    dispatch(addItemsToCart("ebook", book._id, 1));
+    navigate("/cart");
     toast.success("Item Added To Cart");
   };
   const hasReviewed = book?.reviews?.some((r) => r.user === user?._id);
@@ -124,11 +123,16 @@ const BookDetails = () => {
   if (loading || !book) return <Loader />;
 
   const allImages = [book.image, ...(book.images || [])].filter(Boolean);
-  const hasCompletedOrder = orders?.some(
-    (order) =>
-      order.order_status === "completed" &&
-      order.orderItems?.some((item) => item.id === book._id)
-  );
+  const hasCompletedOrder = orders?.some((order) => {
+    return order.orderItems?.some((item) => {
+      if (item.type === "book") {
+        return item.id === book._id && order.order_status === "completed";
+      } else if (item.type === "ebook") {
+        return item.id === book._id && order.payment?.status === "paid";
+      }
+      return false;
+    });
+  });
 
   // Get related books (same category, excluding current book)
   const relatedBooks = books
@@ -210,11 +214,7 @@ const BookDetails = () => {
                     : "N/A"}
                 </span>
               </div>
-              {book.isbn10 && (
-                <div className="text-sm">
-                  <span className="text-gray-600">ISBN-10:</span> {book.isbn10}
-                </div>
-              )}
+
               {book.isbn13 && (
                 <div className="text-sm">
                   <span className="text-gray-600">ISBN-13:</span> {book.isbn13}
@@ -241,6 +241,7 @@ const BookDetails = () => {
             <h1 className="text-xl font-bold text-gray-900 mb-2">
               {book.name}
             </h1>
+            <p className="text-xl text-gray-700 mb-2">{book.title}</p>
 
             <div className="flex items-center mb-4">
               <StarRating rating={book.ratings || 0} />

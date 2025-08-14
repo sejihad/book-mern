@@ -5,6 +5,7 @@ const {
   updateOrder,
   deleteOrder,
   getAllOrders,
+  getSingleAdminOrder,
 } = require("../controllers/orderController");
 const router = express.Router();
 const { isAuthenticator, authorizeRoles } = require("../middleware/auth");
@@ -21,6 +22,7 @@ router.get(
 
 router
   .route("/admin/order/:id")
+  .get(isAuthenticator, authorizeRoles("admin"), getSingleAdminOrder)
   .put(isAuthenticator, authorizeRoles("admin"), updateOrder)
   .delete(isAuthenticator, authorizeRoles("admin"), deleteOrder);
 

@@ -31,6 +31,10 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
+      type: {
+        type: String,
+        required: true,
+      },
     },
   ],
   user: {
@@ -65,7 +69,7 @@ const orderSchema = new mongoose.Schema({
   },
   order_type: {
     type: String,
-    enum: ["book", "ebook", "package"],
+    enum: ["book", "ebook", "package", "mixed"],
   },
   payment: {
     method: {

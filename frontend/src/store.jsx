@@ -10,7 +10,6 @@ import {
   blogsReducer,
   newBlogReducer,
 } from "./reducers/blogReducer";
-import { bookCartReducer } from "./reducers/bookCartReducer";
 import {
   bookAdminDetailsReducer,
   bookDetailsReducer,
@@ -21,20 +20,19 @@ import {
   newReviewReducer,
   reviewReducer,
 } from "./reducers/bookReducer";
+import { CartReducer } from "./reducers/cartReducer";
 import {
   categoriesReducer,
   categoryDetailsReducer,
   categoryReducer,
   newCategoryReducer,
 } from "./reducers/categoryReducer";
-import { ebookCartReducer } from "./reducers/ebookCartReducer";
 import {
   allOrdersReducer,
   myOrdersReducer,
   orderDetailsReducer,
   orderReducer,
 } from "./reducers/orderReducer";
-import { packageCartReducer } from "./reducers/packageCartReducer";
 import {
   newPackageReducer,
   newPackageReviewReducer,
@@ -107,30 +105,19 @@ const rootReducer = combineReducers({
   allOrders: allOrdersReducer,
   order: orderReducer,
   orderDetails: orderDetailsReducer,
+  adminOrderDetails: orderDetailsReducer,
 
   // cart
-  ebookCart: ebookCartReducer,
-  bookCart: bookCartReducer,
-  packageCart: packageCartReducer,
+  Cart: CartReducer,
 });
 
 // Create persisted reducer
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 let initialState = {
-  ebookCart: {
-    ebookCartItems: localStorage.getItem("ebookCartItems")
-      ? JSON.parse(localStorage.getItem("ebookCartItems"))
-      : [],
-  },
-  bookCart: {
-    bookCartItems: localStorage.getItem("bookCartItems")
-      ? JSON.parse(localStorage.getItem("bookCartItems"))
-      : [],
-  },
-  packageCart: {
-    packageCartItems: localStorage.getItem("packageCartItems")
-      ? JSON.parse(localStorage.getItem("packageCartItems"))
+  Cart: {
+    CartItems: localStorage.getItem("CartItems")
+      ? JSON.parse(localStorage.getItem("CartItems"))
       : [],
   },
 };

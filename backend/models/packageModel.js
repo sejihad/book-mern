@@ -8,6 +8,7 @@ const BookSchema = new mongoose.Schema({
     required: [true, "Please enter book name"],
     trim: true,
   },
+
   writer: {
     type: String,
     required: [true, "Please enter writer name"],
@@ -25,9 +26,7 @@ const BookSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
-  isbn10: {
-    type: String,
-  },
+
   isbn13: {
     type: String,
   },
@@ -51,6 +50,11 @@ const PackageSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, "Please enter package name"],
+    trim: true,
+  },
+  title: {
+    type: String,
+    required: [true, "Please enter book title"],
     trim: true,
   },
   description: {
@@ -144,11 +148,7 @@ const PackageSchema = new mongoose.Schema({
   },
 
   // Three Books Embedded
-  books: {
-    book1: { type: BookSchema, required: true },
-    book2: { type: BookSchema, required: true },
-    book3: { type: BookSchema, required: true },
-  },
+  books: [BookSchema],
 });
 
 PackageSchema.pre("save", function (next) {

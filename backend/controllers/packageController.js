@@ -8,6 +8,7 @@ const cloudinary = require("cloudinary");
 const createPackage = catchAsyncErrors(async (req, res, next) => {
   const requiredFields = [
     "name",
+    "title",
     "description",
     "oldPrice",
     "discountPrice",
@@ -23,50 +24,53 @@ const createPackage = catchAsyncErrors(async (req, res, next) => {
   }
 
   // Reconstruct books data from form data
-  const booksData = {
-    book1: {
-      name: req.body["books[book1][name]"],
-      writer: req.body["books[book1][writer]"],
-      language: req.body["books[book1][language]"],
-      publisher: req.body["books[book1][publisher]"],
-      publishDate: req.body["books[book1][publishDate]"],
-      isbn10: req.body["books[book1][isbn10]"],
-      isbn13: req.body["books[book1][isbn13]"],
-      category: req.body["books[book1][category]"],
-    },
-    book2: {
-      name: req.body["books[book2][name]"],
-      writer: req.body["books[book2][writer]"],
-      language: req.body["books[book2][language]"],
-      publisher: req.body["books[book2][publisher]"],
-      publishDate: req.body["books[book2][publishDate]"],
-      isbn10: req.body["books[book2][isbn10]"],
-      isbn13: req.body["books[book2][isbn13]"],
-      category: req.body["books[book2][category]"],
-    },
-    book3: {
-      name: req.body["books[book3][name]"],
-      writer: req.body["books[book3][writer]"],
-      language: req.body["books[book3][language]"],
-      publisher: req.body["books[book3][publisher]"],
-      publishDate: req.body["books[book3][publishDate]"],
-      isbn10: req.body["books[book3][isbn10]"],
-      isbn13: req.body["books[book3][isbn13]"],
-      category: req.body["books[book3][category]"],
-    },
-  };
+  const booksData = [];
+  const maxBooks = 20;
 
-  // Validate all three books are provided with required fields
-  const requiredBookFields = ["name", "writer", "category"];
-  for (const bookNum of ["book1", "book2", "book3"]) {
+  // Dynamically process all books in the request
+  for (let i = 0; i < maxBooks; i++) {
+    const bookPrefix = `books[${i}]`;
+    const bookName = req.body[`${bookPrefix}[name]`];
+
+    // Skip if no book found at this index
+    if (!bookName) continue;
+
+    const bookData = {
+      name: bookName,
+      writer: req.body[`${bookPrefix}[writer]`],
+      language: req.body[`${bookPrefix}[language]`],
+      publisher: req.body[`${bookPrefix}[publisher]`] || "",
+      publishDate: req.body[`${bookPrefix}[publishDate]`] || "",
+
+      isbn13: req.body[`${bookPrefix}[isbn13]`] || "",
+      category: req.body[`${bookPrefix}[category]`],
+    };
+
+    booksData.push(bookData);
+  }
+
+  // Validate at least one book exists
+  if (booksData.length === 0) {
+    return next(new ErrorHandler("At least one book is required", 400));
+  }
+
+  // Validate each book has required fields
+  const requiredBookFields = ["name", "writer", "language", "category"];
+  booksData.forEach((book, index) => {
     for (const field of requiredBookFields) {
-      if (!booksData[bookNum][field]) {
+      if (!book[field]) {
         return next(
-          new ErrorHandler(`Book ${bookNum} ${field} is required`, 400)
+          new ErrorHandler(`Book ${index + 1} ${field} is required`, 400)
         );
       }
     }
+  });
+  // Validate at least one book is provided
+  if (booksData.length === 0) {
+    return next(new ErrorHandler("At least one book is required", 400));
   }
+
+  // Validate required book fields for each book
 
   // Validate main image
   if (!req.files?.image) {
@@ -121,11 +125,34 @@ const createPackage = catchAsyncErrors(async (req, res, next) => {
     }
   }
 
-  // Upload demoPdf files for each book
+  // Upload demo PDFs for each book
+  for (let i = 0; i < booksData.length; i++) {
+    const pdfField = `books[${i}][demoPdf]`;
+    if (req.files[pdfField]) {
+      const file = req.files[pdfField][0] || req.files[pdfField];
+      try {
+        const result = await cloudinary.uploader.upload(
+          file.tempFilePath ||
+            `data:${file.mimetype};base64,${file.data.toString("base64")}`,
+          {
+            folder: "/package/demo_pdfs",
+            resource_type: "auto", // For PDF files
+          }
+        );
+        booksData[i].demoPdf = {
+          public_id: result.public_id,
+          url: result.secure_url,
+        };
+      } catch (error) {
+        console.error(`Demo PDF upload error for book ${i + 1}:`, error);
+      }
+    }
+  }
 
   // Create package
   const packageData = {
     name: req.body.name,
+    title: req.body.title,
     description: req.body.description,
     oldPrice: req.body.oldPrice,
     discountPrice: req.body.discountPrice,
@@ -151,16 +178,11 @@ const updatePackage = catchAsyncErrors(async (req, res, next) => {
   const package = await Package.findById(packageId);
 
   if (!package) {
-    return res.status(404).json({
-      success: false,
-      message: "Package not found",
-    });
+    return next(new ErrorHandler("Package not found", 404));
   }
-  const booksData = package.books || {
-    book1: {},
-    book2: {},
-    book3: {},
-  };
+
+  // Initialize update data
+  const updateData = { ...req.body };
 
   // Handle image update
   if (req.files?.image) {
@@ -171,24 +193,22 @@ const updatePackage = catchAsyncErrors(async (req, res, next) => {
       }
 
       // Upload new image
-      const file = req.files.image;
+      const file = req.files.image[0] || req.files.image;
       const result = await cloudinary.uploader.upload(
-        `data:${file.mimetype};base64,${file.data.toString("base64")}`,
+        file.tempFilePath ||
+          `data:${file.mimetype};base64,${file.data.toString("base64")}`,
         {
           folder: "/package/packages",
-          resource_type: "auto",
+          resource_type: "image",
         }
       );
-      req.body.image = {
+      updateData.image = {
         public_id: result.public_id,
         url: result.secure_url,
       };
     } catch (error) {
       console.error("Image update error:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Failed to update package image",
-      });
+      return next(new ErrorHandler("Failed to update package image", 500));
     }
   }
 
@@ -210,10 +230,11 @@ const updatePackage = catchAsyncErrors(async (req, res, next) => {
       const images = [];
       for (const file of files.slice(0, 4)) {
         const result = await cloudinary.uploader.upload(
-          `data:${file.mimetype};base64,${file.data.toString("base64")}`,
+          file.tempFilePath ||
+            `data:${file.mimetype};base64,${file.data.toString("base64")}`,
           {
             folder: "/package/additional_images",
-            resource_type: "auto",
+            resource_type: "image",
           }
         );
         images.push({
@@ -221,63 +242,101 @@ const updatePackage = catchAsyncErrors(async (req, res, next) => {
           url: result.secure_url,
         });
       }
-      req.body.images = images;
+      updateData.images = images;
     } catch (error) {
       console.error("Additional images update error:", error);
+      return next(new ErrorHandler("Failed to update additional images", 500));
     }
   }
-  for (const bookNum of ["book1", "book2", "book3"]) {
-    const demoPdfField = `books[${bookNum}][demoPdf]`;
 
-    if (req.files && req.files[demoPdfField]) {
-      // পুরানো demoPdf ডিলিট
-      if (booksData[bookNum]?.demoPdf?.public_id) {
-        await cloudinary.uploader.destroy(
-          booksData[bookNum].demoPdf.public_id,
-          { resource_type: "raw" }
+  // Process books dynamically (1-20)
+  const booksData = [];
+  let bookIndex = 0;
+
+  while (true) {
+    const bookPrefix = `books[${bookIndex}]`;
+    const bookName = req.body[`${bookPrefix}[name]`];
+
+    // Stop when no more books are found
+    if (!bookName) break;
+
+    const bookData = {
+      name: bookName,
+      writer: req.body[`${bookPrefix}[writer]`],
+      language: req.body[`${bookPrefix}[language]`],
+      publisher: req.body[`${bookPrefix}[publisher]`] || "",
+      publishDate: req.body[`${bookPrefix}[publishDate]`] || "",
+
+      isbn13: req.body[`${bookPrefix}[isbn13]`] || "",
+      category: req.body[`${bookPrefix}[category]`],
+    };
+
+    // Handle PDF upload for this book
+    const pdfField = `${bookPrefix}[demoPdf]`;
+    if (req.files && req.files[pdfField]) {
+      try {
+        // Delete old PDF if exists
+        const existingBook = package.books[bookIndex];
+        if (existingBook?.demoPdf?.public_id) {
+          await cloudinary.uploader.destroy(existingBook.demoPdf.public_id, {
+            resource_type: "raw",
+          });
+        }
+
+        // Upload new PDF
+        const file = req.files[pdfField][0] || req.files[pdfField];
+        const result = await cloudinary.uploader.upload(
+          file.tempFilePath ||
+            `data:${file.mimetype};base64,${file.data.toString("base64")}`,
+          {
+            folder: `/package/demo_pdfs`,
+            resource_type: "raw",
+          }
+        );
+        bookData.demoPdf = {
+          public_id: result.public_id,
+          url: result.secure_url,
+        };
+      } catch (error) {
+        console.error(`PDF upload error for book ${bookIndex + 1}:`, error);
+        return next(
+          new ErrorHandler(
+            `Failed to upload PDF for book ${bookIndex + 1}`,
+            500
+          )
         );
       }
-
-      const file = Array.isArray(req.files[demoPdfField])
-        ? req.files[demoPdfField][0]
-        : req.files[demoPdfField];
-
-      const pdfResult = await cloudinary.uploader.upload(
-        file.tempFilePath ||
-          `data:${file.mimetype};base64,${file.data.toString("base64")}`,
-        {
-          folder: `/package/demo_pdfs/${bookNum}`,
-          resource_type: "raw",
-        }
-      );
-
-      booksData[bookNum].demoPdf = {
-        public_id: pdfResult.public_id,
-        url: pdfResult.secure_url,
-      };
-    } else if (
-      typeof req.body.books?.[bookNum]?.demoPdf === "string" &&
-      req.body.books[bookNum].demoPdf.startsWith("http")
-    ) {
-      // পুরানো URL থেকে আসলে আগের মতো রেখে দিবে
-      booksData[bookNum].demoPdf = booksData[bookNum].demoPdf || null;
-    } else {
-      // demoPdf ফাইল না এলে আগেরটা রেখে দিবে, null/set করবে না
-      booksData[bookNum].demoPdf = booksData[bookNum].demoPdf || null;
+    } else if (package.books[bookIndex]?.demoPdf) {
+      // Keep existing PDF if no new one was uploaded
+      bookData.demoPdf = package.books[bookIndex].demoPdf;
     }
+
+    booksData.push(bookData);
+    bookIndex++;
   }
+
+  // Ensure at least one book exists
+  if (booksData.length === 0) {
+    return next(new ErrorHandler("At least one book is required", 400));
+  }
+
+  updateData.books = booksData;
 
   // Handle slug update if name changed
   if (req.body.name && req.body.name !== package.name) {
-    req.body.slug = slugify(req.body.name, { lower: true, strict: true });
+    updateData.slug = slugify(req.body.name, { lower: true, strict: true });
   }
-  req.body.books = booksData;
+
   // Update package
-  const updatedPackage = await Package.findByIdAndUpdate(packageId, req.body, {
-    new: true,
-    runValidators: true,
-    useFindAndModify: false,
-  });
+  const updatedPackage = await Package.findByIdAndUpdate(
+    packageId,
+    updateData,
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
 
   res.status(200).json({
     success: true,
@@ -327,6 +386,15 @@ const deletePackage = catchAsyncErrors(async (req, res, next) => {
     if (package.images?.length > 0) {
       for (const img of package.images) {
         await cloudinary.uploader.destroy(img.public_id);
+      }
+    }
+    if (package.books?.length > 0) {
+      for (const book of package.books) {
+        if (book.demoPdf?.public_id) {
+          await cloudinary.uploader.destroy(book.demoPdf.public_id, {
+            resource_type: "raw",
+          });
+        }
       }
     }
 
